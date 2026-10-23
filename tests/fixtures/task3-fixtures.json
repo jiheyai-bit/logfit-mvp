@@ -1,0 +1,26 @@
+{
+  "referenceNow": "2026-10-23T03:00:00.000Z",
+  "referenceDate": "2026-10-23",
+  "complexSentence": "아침 샐러드, 점심 김치찌개, 저녁 요가 40분",
+  "dateCases": [
+    {"input": "어제 저녁 걷기 30분", "expectedDate": "2026-10-22"},
+    {"input": "2026년 10월 20일 점심 비빔밥", "expectedDate": "2026-10-20"},
+    {"input": "주말에 운동했어", "expectedCertainty": "uncertain"}
+  ],
+  "stateCases": [
+    {"name": "rest", "input": "오늘 휴식했어", "expectedStatus": "휴식"},
+    {"name": "planned", "input": "2026년 10월 25일 요가 40분 할 예정", "expectedStatus": "운동 예정"},
+    {"name": "no-record", "input": "오늘은 아무것도 기록하지 않음", "expectedStatus": "미기록"},
+    {"name": "uncertain", "input": "운동했는지 모르겠어", "expectedStatus": "확인 필요"},
+    {"name": "completed-no-duration", "input": "오늘 달리기 했어", "expectedStatus": "운동 완료"},
+    {"name": "completed-exercise-plus-rest", "input": "오늘 요가 40분, 오늘 휴식했어", "expectedStatus": "운동 완료", "expectedExerciseCount": 1, "expectedExerciseMinutes": 40, "expectedRestCount": 1}
+  ],
+  "weeklyRecords": [
+    {"type":"meal","item":"샐러드","raw_text":"월요일 샐러드","record_date":"2026-10-19","completion":"completed"},
+    {"type":"exercise","exercise_type":"걷기","duration_min":30,"raw_text":"화요일 걷기 30분","record_date":"2026-10-20","completion":"completed"},
+    {"type":"exercise","exercise_type":"요가","duration_min":40,"raw_text":"수요일 요가 40분","record_date":"2026-10-21","completion":"completed"},
+    {"type":"exercise","exercise_type":"달리기","duration_min":null,"raw_text":"목요일 달리기","record_date":"2026-10-22","completion":"completed"},
+    {"type":"exercise","exercise_type":"수영","duration_min":60,"raw_text":"금요일 수영 60분","record_date":"2026-10-23","completion":"planned"},
+    {"type":"rest","item":"휴식","raw_text":"토요일 휴식","record_date":"2026-10-24","completion":"completed"}
+  ]
+}

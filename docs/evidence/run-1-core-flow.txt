@@ -1,0 +1,10 @@
+Browser harness output (session: logfit-task3-fix)
+URL: index.html
+Viewport: 1280x577
+
+ASSERT core.review.cards=3
+ASSERT core.review.durations=['40']
+ASSERT core.review.raw_texts=['원문: 아침 샐러드, 점심 김치찌개, 저녁 요가 40분', '원문: 아침 샐러드, 점심 김치찌개, 저녁 요가 40분', '원문: 아침 샐러드, 점심 김치찌개, 저녁 요가 40분']
+ASSERT core.storage.count=3
+ASSERT core.storage.types=['meal', 'meal', 'exercise']
+ASSERT core.dashboard={'mealCount': '2', 'minutes': '40분', 'status': '운동 완료'}

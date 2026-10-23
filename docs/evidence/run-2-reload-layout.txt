@@ -1,0 +1,7 @@
+Browser harness output (session: logfit-task3-fix)
+URL: index.html
+
+ASSERT reload.storage.count=3
+ASSERT reload.dashboard={'mealCount': '2', 'minutes': '40분', 'status': '운동 완료'}
+ASSERT narrow.viewport={'innerWidth': 390, 'innerHeight': 844, 'scrollWidth': 375, 'clientWidth': 375}
+ASSERT narrow.layout={'hero': True, 'input': True, 'confirmButton': True, 'summary': True}

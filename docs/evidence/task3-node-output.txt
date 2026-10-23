@@ -1,0 +1,10 @@
+$ node tests/task3.test.js
+PASS parses the core complex sentence into independent records
+PASS resolves KST explicit, relative, and unclear dates without guessing
+PASS keeps exercise, rest, no-record, planned, and uncertain states distinct
+PASS preserves same-day rest alongside completed exercise in summary and detail records
+PASS aggregates a seven-day window by record date and excludes planned time
+PASS persists confirmed records and reloads the same records from localStorage
+Task 3 synthetic checks complete
+$ printf 'exit code: 0\n'
+exit code: 0
