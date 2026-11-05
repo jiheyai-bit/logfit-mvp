@@ -1,5 +1,5 @@
 Browser harness output (session: logfit-task3-fix)
-URL: index.html
+URL: local index.html
 Viewport: 1280x577
 
 ASSERT core.review.cards=3

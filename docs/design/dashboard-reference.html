@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LogFit 코치 활동 대시보드 — 참조 레이아웃</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+/* ===== 기본 ===== */
+:root{
+  --bg:#F3F4F6; --card:#FFFFFF; --ink:#111827; --muted:#6B7280; --line:#E5E7EB;
+  --blue:#2563EB; --blue-dark:#1E3A8A; --blue-soft:#EFF6FF;
+  --done-bg:#DCFCE7; --done-fg:#166534;
+  --miss-bg:#FEE2E2; --miss-fg:#991B1B;
+  --adj-bg:#FEF3C7;  --adj-fg:#92400E;
+  --wait-bg:#E5E7EB; --wait-fg:#374151;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',system-ui,sans-serif}
+button{font-family:inherit;cursor:pointer}
+.page{max-width:1200px;margin:0 auto;padding:40px 32px 56px;display:flex;flex-direction:column;gap:28px}
+.card{background:var(--card);border-radius:24px;padding:28px 32px;display:flex;flex-direction:column;gap:20px}
+.card h2{margin:0;font-size:22px;font-weight:800}
+.card .sub{margin:6px 0 0;font-size:14px;color:var(--muted)}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
+.date{font-size:12px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:stretch}
+.col-main{flex:2 1 560px;min-width:0}
+.col-side{flex:1 1 320px;min-width:0}
+.chip{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.chip.done{background:var(--done-bg);color:var(--done-fg)}
+.chip.miss{background:var(--miss-bg);color:var(--miss-fg)}
+.chip.adj{background:var(--adj-bg);color:var(--adj-fg)}
+.chip.wait{background:var(--wait-bg);color:var(--wait-fg)}
+.empty{font-size:14px;color:var(--muted);padding:12px 0}
+
+/* ===== 헤더 ===== */
+.header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:24px}
+.header .eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;color:#1D4ED8}
+.header h1{margin:10px 0;font-size:40px;line-height:1.2;font-weight:800;letter-spacing:-.02em}
+.header p{margin:0;font-size:16px;color:var(--muted)}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.user-chip{display:flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:10px 18px 10px 12px;box-shadow:0 1px 2px rgba(17,24,39,.06);font-size:14px;font-weight:500}
+.user-chip .avatar{width:28px;height:28px;border-radius:999px;background:#DBEAFE;color:#1E40AF;font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.status{display:flex;align-items:center;gap:8px;font-size:13px;color:#374151}
+.status .dot{width:8px;height:8px;border-radius:999px;background:#16A34A}
+
+/* ===== 입력 바 ===== */
+.ask{display:flex;flex-direction:column;gap:12px;background:#111827;border-radius:20px;padding:18px 16px 16px 24px}
+.ask-line{display:flex;align-items:center;gap:14px}
+.ask label{font-size:13px;color:#9CA3AF;white-space:nowrap}
+.ask input{flex:1 1 200px;min-width:0;background:transparent;border:0;color:#fff;font-size:18px;font-weight:700;font-family:inherit;outline:none}
+.ask .mic{width:48px;height:48px;border-radius:999px;border:0;background:var(--blue);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ask-result{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-left:2px;font-size:13px;color:#D1D5DB}
+.ask-result .chip{background:#1F2937;color:#93C5FD}
+.ask-result .sep{color:#4B5563}
+.ask-result .save{margin-left:auto;height:34px;padding:0 14px;border-radius:10px;border:0;background:#fff;color:#111827;font-weight:700;font-size:13px}
+
+/* ===== 판단 로그 ===== */
+.log-item{display:flex;gap:16px;padding:16px 0;border-top:1px solid var(--line)}
+.log-time{width:56px;flex:0 0 56px;font-size:13px;font-weight:700;padding-top:2px}
+.log-body{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:8px}
+.log-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:15px;font-weight:700}
+.log-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;font-size:13px}
+.log-grid div{display:flex;gap:8px}
+.log-grid .k{color:#9CA3AF;flex:0 0 28px}
+.log-grid .v{color:#374151}
+.log-tools{font-size:12px;color:var(--muted)}
+
+/* ===== 다음 제안 ===== */
+.next{background:var(--blue-dark);color:#fff;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:18px}
+.next .eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;color:#BFDBFE}
+.next h2{margin:8px 0 0;font-size:24px;font-weight:800;line-height:1.3}
+.next-lines{display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.5;color:#DBEAFE}
+.next-lines div{display:flex;gap:10px}
+.next-lines .k{flex:0 0 36px;color:#93C5FD}
+.next-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
+.next-actions button{height:46px;border-radius:12px;font-weight:700;font-size:14px}
+.btn-primary{flex:1 1 100px;border:0;background:#fff;color:var(--blue-dark)}
+.btn-ghost{flex:1 1 80px;border:1px solid #93C5FD;background:transparent;color:#fff}
+.btn-ghost.small{flex:0 0 auto;padding:0 16px}
+
+/* ===== 주간 계획 vs 실제 ===== */
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.day{display:flex;flex-direction:column;gap:8px}
+.day .name{font-size:12px;font-weight:700;color:var(--muted);text-align:center}
+.day .plan,.day .act{border-radius:12px;padding:10px 6px;font-size:12px;font-weight:700;text-align:center;display:flex;align-items:center;justify-content:center}
+.day .plan{background:#F3F4F6;color:#374151;min-height:40px}
+.day .plan.future{background:var(--blue-soft)}
+.day .act{flex-direction:column;gap:4px;min-height:64px}
+.day .act.done{background:var(--done-bg);color:var(--done-fg)}
+.day .act.miss{background:var(--miss-bg);color:var(--miss-fg)}
+.day .act.adj{background:var(--adj-bg);color:var(--adj-fg)}
+.day .act.wait{background:var(--wait-bg);color:var(--wait-fg)}
+.legend{display:flex;gap:18px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:middle}
+.balance{display:flex;flex-direction:column;gap:10px;padding-top:8px;border-top:1px solid var(--line)}
+.balance .t{font-size:13px;font-weight:700;color:#374151}
+.bar{display:flex;align-items:center;gap:12px;font-size:13px}
+.bar .n{flex:0 0 48px;font-weight:700}
+.bar .track{flex:1 1 0;height:10px;border-radius:999px;background:#F3F4F6;overflow:hidden}
+.bar .fill{height:100%;border-radius:999px}
+.bar .l{flex:0 0 64px;color:var(--muted);text-align:right}
+
+/* ===== 제안과 응답 ===== */
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{background:#F3F4F6;border-radius:14px;padding:14px 16px}
+.tile .k{font-size:12px;color:var(--muted)}
+.tile .v{font-size:26px;font-weight:800}
+.tile.accent{background:var(--blue-soft)}
+.tile.accent .k,.tile.accent .v{color:#1E40AF}
+.reply{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F3F4F6;font-size:13px}
+.reply .t{font-weight:700}
+.reply .w{color:var(--muted);font-size:12px}
+
+/* ===== 학습된 선호 / 나의 변화 ===== */
+.mem{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mem .m{border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.mem .m .r{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:700}
+.mem .m .r span{font-size:11px;color:var(--muted);font-weight:400;white-space:nowrap}
+.mem .m .f{font-size:13px;color:var(--muted)}
+.stat{display:flex;justify-content:space-between;align-items:baseline;background:#F3F4F6;border-radius:14px;padding:14px 16px}
+.stat .k{font-size:13px;color:var(--muted)}
+.stat .v{font-size:22px;font-weight:800}
+.stat .v small{font-size:13px;font-weight:500;color:var(--muted)}
+.note{margin:0;font-size:12px;color:#9CA3AF}
+
+@media (max-width:768px){
+  .page{padding:24px 16px 40px}
+  .header h1{font-size:30px}
+  .log-grid,.mem,.tiles{grid-template-columns:1fr}
+  .week{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+  .day .plan,.day .act{font-size:10px}
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- 헤더 -->
+  <header class="header">
+    <div>
+      <div class="eyebrow">LOGFIT 2.0 · 코치 에이전트</div>
+      <h1>오늘 코치가 먼저<br>움직였어요</h1>
+      <p>기록은 Telegram에서, 여기서는 코치가 무엇을 판단했는지 봅니다.</p>
+    </div>
+    <div class="header-right">
+      <div class="user-chip"><span class="avatar">지</span>지혜님</div>
+      <div class="status"><span class="dot"></span><span data-logfit="status">Hermes 연결됨 · 크론 4개 활성 · 마지막 판단 05:30</span></div>
+    </div>
+  </header>
+
+  <!-- 입력 바: 기록/요청 통합. data-logfit="ask-result"는 판별 결과가 있을 때만 표시 -->
+  <form class="ask">
+    <div class="ask-line">
+      <label for="ask">한 문장으로 기록하거나 요청</label>
+      <input id="ask" type="text" placeholder="오늘 점심 김치찌개, 저녁 요가 40분 했어">
+      <button type="submit" class="mic" aria-label="음성으로 입력">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+      </button>
+    </div>
+    <div class="ask-result" data-logfit="ask-result">
+      <span class="chip">코치 판별: 기록 2건</span>
+      <span>🍚 식사 · 점심 김치찌개</span><span class="sep">|</span>
+      <span>🧘‍♀️ 운동 · 요가 40분 · 저녁</span>
+      <button type="button" class="save">확인하고 저장</button>
+    </div>
+  </form>
+
+  <!-- 1열 -->
+  <div class="row">
+    <section class="card col-main">
+      <div class="card-head">
+        <div><h2>오늘의 판단 로그</h2><p class="sub">입력 → 결정 → 근거. 코치가 왜 그렇게 했는지 남깁니다.</p></div>
+        <span class="date" data-logfit="today">11월 5일 (수)</span>
+      </div>
+      <div data-logfit="decision-log">
+        <!-- decision_log 1건 = .log-item. status: executed→chip.done "실행됨", proposed→chip.adj "제안 중", waiting→chip.wait "대기" -->
+        <div class="log-item">
+          <div class="log-time">05:30</div>
+          <div class="log-body">
+            <div class="log-title">🏃‍♀️ 한강 5km 러닝 제안 발송 <span class="chip done">실행됨</span></div>
+            <div class="log-grid">
+              <div><span class="k">입력</span><span class="v">기온 7.5℃ · 강수 0% · 바람 6.9km/h · 캘린더 0건</span></div>
+              <div><span class="k">근거</span><span class="v">야외 조건 충족, 이번 주 유산소 1/3회</span></div>
+            </div>
+            <div class="log-tools">도구: Open-Meteo → Calendar → Telegram</div>
+          </div>
+        </div>
+        <div class="log-item">
+          <div class="log-time">21:00</div>
+          <div class="log-body">
+            <div class="log-title">🏃‍♀️ 내일 계획 생성 → 승인 대기 <span class="chip adj">제안 중</span></div>
+            <div class="log-grid">
+              <div><span class="k">입력</span><span class="v">최근 7일 기록 · 내일 예보 · 캘린더</span></div>
+              <div><span class="k">근거</span><span class="v">어제 💪 하체 근력 → 48시간 근력 제외, 러닝 1회로 최소</span></div>
+            </div>
+            <div class="log-tools">도구: records → Open-Meteo → Calendar → Telegram</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="next col-side" data-logfit="next-suggestion">
+      <!-- 대기 중 suggestion이 없으면: <div class="empty" style="color:#BFDBFE">오늘은 대기 중인 제안이 없어요</div> -->
+      <div>
+        <div class="eyebrow">다음 제안 · 승인 대기</div>
+        <h2>🏃‍♀️ 내일 06:00<br>한강 5km 러닝</h2>
+      </div>
+      <div class="next-lines">
+        <div><span class="k">근거</span><span>어제 💪 하체 근력 → 48시간 내 근력 제외. 이번 주 러닝 1회로 가장 적음.</span></div>
+        <div><span class="k">날씨</span><span>06:00 기온 6℃ · 강수 0% · 바람 8km/h</span></div>
+        <div><span class="k">일정</span><span>09:00 전까지 캘린더 비어 있음</span></div>
+        <div><span class="k">대안</span><span>🧘‍♀️ 19:30 요가 40분 (실내)</span></div>
+      </div>
+      <div class="next-actions">
+        <button type="button" class="btn-primary">승인하고 알림 등록</button>
+        <button type="button" class="btn-ghost">대안으로</button>
+        <button type="button" class="btn-ghost small">거절</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- 2열 -->
+  <div class="row">
+    <section class="card col-main">
+      <div class="card-head">
+        <div><h2>이번 주 계획 vs 실제</h2><p class="sub" data-logfit="week-sub">코치가 세운 계획과 실제 수행. 미수행 1 · 재조정 1.</p></div>
+        <span class="date" data-logfit="week-range">11/3 (월) – 11/9 (일)</span>
+      </div>
+      <div class="week" data-logfit="week">
+        <!-- 요일 1개 = .day. 위 칸 .plan (미래면 .future), 아래 칸 .act + 상태 클래스 + 얼굴 SVG -->
+        <div class="day"><div class="name">월</div><div class="plan">🧘‍♀️ 요가 40분</div>
+          <div class="act miss"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="미수행"><circle cx="12" cy="12" r="9"/><path d="M7.5 8.5l3 3m0-3l-3 3"/><path d="M13.5 8.5l3 3m0-3l-3 3"/><path d="M8.5 16.5c.9-1.3 2.1-2 3.5-2s2.6.7 3.5 2"/></svg><span>미수행</span></div></div>
+        <div class="day"><div class="name">화</div><div class="plan">💪 하체 근력</div>
+          <div class="act done"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="완료"><circle cx="12" cy="12" r="9"/><path d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2"/><circle cx="9" cy="10" r=".6" fill="currentColor"/><circle cx="15" cy="10" r=".6" fill="currentColor"/></svg><span>하체 60분</span></div></div>
+        <div class="day"><div class="name">수</div><div class="plan">🧘‍♀️ 요가 40분</div>
+          <div class="act adj"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="재조정"><circle cx="12" cy="12" r="9"/><path d="M8 15c1-1 2-1 3 0s2 1 3 0 2-1 3 0"/><circle cx="9" cy="10" r=".6" fill="currentColor"/><circle cx="15" cy="10" r=".6" fill="currentColor"/></svg><span>러닝 5km</span></div></div>
+        <div class="day"><div class="name">목</div><div class="plan future">🏃‍♀️ 러닝 5km</div>
+          <div class="act wait"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2" role="img" aria-label="예정"><circle cx="12" cy="12" r="9"/><path d="M9 15h6" stroke-dasharray="0"/></svg><span>제안 중</span></div></div>
+        <div class="day"><div class="name">금</div><div class="plan future">💪 상체 근력</div>
+          <div class="act wait"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2" role="img" aria-label="예정"><circle cx="12" cy="12" r="9"/><path d="M9 15h6" stroke-dasharray="0"/></svg><span>예정</span></div></div>
+        <div class="day"><div class="name">토</div><div class="plan future">🏃‍♀️ 러닝 7km</div>
+          <div class="act wait"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2" role="img" aria-label="예정"><circle cx="12" cy="12" r="9"/><path d="M9 15h6" stroke-dasharray="0"/></svg><span>예정</span></div></div>
+        <div class="day"><div class="name">일</div><div class="plan future">🧘‍♀️ 요가 40분</div>
+          <div class="act wait"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 2" role="img" aria-label="예정"><circle cx="12" cy="12" r="9"/><path d="M9 15h6" stroke-dasharray="0"/></svg><span>예정</span></div></div>
+      </div>
+      <div class="legend">
+        <span>위 줄: 계획</span><span>아래 줄: 실제</span>
+        <span><i style="background:var(--done-bg)"></i>완료</span>
+        <span><i style="background:var(--miss-bg)"></i>미수행</span>
+        <span><i style="background:var(--adj-bg)"></i>재조정</span>
+      </div>
+      <div class="balance" data-logfit="balance">
+        <div class="t">종목 균형 (주 목표 대비)</div>
+        <div class="bar"><span class="n">러닝</span><div class="track"><div class="fill" style="width:33%;background:#2563EB"></div></div><span class="l">1 / 3회</span></div>
+        <div class="bar"><span class="n">근력</span><div class="track"><div class="fill" style="width:50%;background:#0F766E"></div></div><span class="l">1 / 2회</span></div>
+        <div class="bar"><span class="n">요가</span><div class="track"><div class="fill" style="width:0%;background:#B45309"></div></div><span class="l">0 / 2회</span></div>
+      </div>
+    </section>
+
+    <section class="card col-side">
+      <div><h2>제안과 응답</h2><p class="sub">최근 7일 · 학습 루프의 입력</p></div>
+      <div class="tiles" data-logfit="suggestion-stats">
+        <div class="tile"><div class="k">제안</div><div class="v">6</div></div>
+        <div class="tile accent"><div class="k">수용률</div><div class="v">50%</div></div>
+        <div class="tile"><div class="k">수용 · 거절</div><div class="v" style="font-size:20px">3 · 1</div></div>
+        <div class="tile"><div class="k">무응답</div><div class="v" style="font-size:20px">2</div></div>
+      </div>
+      <div data-logfit="suggestion-list" style="border-top:1px solid var(--line)">
+        <div class="reply"><div><div class="t">🏃‍♀️ 05:30 한강 러닝 제안</div><div class="w">11/4 · 응답까지 42분</div></div><span class="chip done">수용</span></div>
+        <div class="reply"><div><div class="t">🧘‍♀️ 흐린 날 실내 요가 제안</div><div class="w">11/2 · 응답까지 3분</div></div><span class="chip miss">거절</span></div>
+        <div class="reply"><div><div class="t">05:40 후속 알림</div><div class="w">11/1</div></div><span class="chip wait">무응답</span></div>
+      </div>
+      <button type="button" class="btn-ghost" style="color:var(--ink);border-color:var(--line);height:40px;border-radius:10px;font-weight:700;font-size:13px;background:#fff">CSV 내보내기</button>
+    </section>
+  </div>
+
+  <!-- 3열 -->
+  <div class="row">
+    <section class="card col-main">
+      <div><h2>학습된 선호</h2><p class="sub">응답에서 코치가 배운 것. Hermes 메모리에 유지됩니다.</p></div>
+      <div class="mem" data-logfit="memory-rules">
+        <!-- 비어 있으면: <div class="empty">아직 학습된 선호가 없어요. 제안에 응답하면 여기에 쌓입니다.</div> -->
+        <div class="m"><div class="r">공복 유산소는 05:30 제안 유지<span>10/28~</span></div><div class="f">아침 제안 4회 중 3회 수용</div></div>
+        <div class="m"><div class="r">근력 후 48시간 같은 부위 제외<span>기본 규칙</span></div><div class="f">하체 11/4 → 11/6까지 하체 제외</div></div>
+      </div>
+    </section>
+
+    <section class="card col-side">
+      <div><h2>나의 변화</h2><p class="sub">최근 4주</p></div>
+      <div style="display:flex;flex-direction:column;gap:10px" data-logfit="body-stats">
+        <div class="stat"><span class="k">체중</span><span class="v">62.0<small> kg · ▼0.8</small></span></div>
+        <div class="stat"><span class="k">체지방률</span><span class="v">28.0<small> % · ▼0.4p</small></span></div>
+        <div class="stat"><span class="k">근육량</span><span class="v">23.0<small> kg · 유지</small></span></div>
+      </div>
+      <p class="note">영양소·칼로리는 입력 기반 추정치입니다.</p>
+    </section>
+  </div>
+
+</div>
+</body>
+</html>

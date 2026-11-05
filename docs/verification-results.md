@@ -16,7 +16,7 @@ All data below is synthetic. The browser run used a fixed synthetic sentence and
 
 ## Browser evidence
 
-Browser: local `index.html`, desktop viewport 1280x577 and narrow viewport 390x844. Durable verbatim harness output and DOM assertions are stored under [`docs/evidence/`](evidence/). No temporary screenshot path is used as evidence.
+Browser: local `index.html`, desktop viewport 1280x577 and narrow viewport 390x844. Durable verbatim harness output and DOM assertions are stored under [`docs/evidence/`](evidence/). No local absolute path is used as evidence.
 
 ### Run 1 — core complex sentence
 
