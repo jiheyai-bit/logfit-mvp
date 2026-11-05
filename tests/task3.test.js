@@ -68,6 +68,21 @@ test('resolves KST explicit, relative, and unclear dates without guessing', () =
   assert.strictEqual(unclear.record_date, null);
 });
 
+test('resolves month-day dates and compound durations for separate exercises', () => {
+  const input = '10월 21일 PT근력운동 1시간, 조깅 30분 했어';
+  const records = context.parseLogFitSentence(input, new Date('2026-10-27T03:00:00.000Z')).records;
+  assert.strictEqual(records.length, 2);
+  records.forEach((record) => assert.strictEqual(record.record_date, '2026-10-21'));
+  assert.strictEqual(JSON.stringify(Array.from(records.map((record) => record.duration_min))), JSON.stringify([60, 30]));
+});
+
+test('converts an hour and minute duration into total minutes', () => {
+  const input = '10월 21일 PT근력운동 1시간 30분, 조깅 30분 했어';
+  const records = context.parseLogFitSentence(input, new Date('2026-10-27T03:00:00.000Z')).records;
+  assert.strictEqual(records.length, 2);
+  assert.strictEqual(JSON.stringify(Array.from(records.map((record) => record.duration_min))), JSON.stringify([90, 30]));
+});
+
 test('keeps exercise, rest, no-record, planned, and uncertain states distinct', () => {
   const statusFor = (input) => {
     const records = context.parseLogFitSentence(input, now).records;
@@ -113,6 +128,12 @@ test('persists confirmed records and reloads the same records from localStorage'
   const serialized = storage.get('logfit.records.v1');
   assert.strictEqual(JSON.parse(serialized).length, 3);
   assert.strictEqual(JSON.stringify(context.loadLogFitRecords()), JSON.stringify(saved));
+});
+
+test('does not treat clock minutes as exercise duration', () => {
+  const records = context.parseLogFitSentence('11월 4일 오후 8시 30분 하체 근력운동 1시간 진행', now).records;
+  assert.strictEqual(records.length, 1);
+  assert.strictEqual(records[0].duration_min, 60);
 });
 
 console.log('Task 3 synthetic checks complete');

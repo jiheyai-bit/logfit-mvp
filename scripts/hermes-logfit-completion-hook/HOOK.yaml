@@ -1,0 +1,5 @@
+name: logfit-completion
+description: Save Telegram workout completion messages into LogFit
+
+events:
+  - agent:start

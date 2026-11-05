@@ -1,57 +1,310 @@
 <!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LogFit</title>
-  <style>
-    :root { color-scheme: light; --ink:#17324d; --muted:#64748b; --line:#d9e3ec; --accent:#e8754e; --soft:#fff8f3; --ok:#19734a; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:#f5f8fb; color:var(--ink); font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
-    button, textarea, input { font:inherit; }
-    button { cursor:pointer; }
-    .app-shell { max-width:1120px; margin:auto; padding:24px; }
-    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px; }
-    .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:1.35rem; letter-spacing:-.03em; }
-    .brand-mark { display:grid; place-items:center; width:36px; height:36px; border-radius:12px; color:white; background:linear-gradient(135deg,#f19a69,#e2574c); }
-    .view-switch { display:flex; gap:6px; padding:4px; border:1px solid var(--line); border-radius:999px; background:white; }
-    .view-switch button { border:0; border-radius:999px; padding:8px 14px; color:var(--muted); background:transparent; }
-    .view-switch button[aria-pressed="true"] { color:white; background:var(--ink); }
-    .hero, .panel { border:1px solid var(--line); border-radius:20px; background:white; box-shadow:0 8px 30px rgba(23,50,77,.05); }
-    .hero { padding:30px; margin-bottom:18px; background:linear-gradient(135deg,#fff8f2,#fff); }
-    .eyebrow { margin:0 0 8px; color:var(--accent); font-size:.78rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
-    h1, h2, h3, p { margin-top:0; } h1 { margin-bottom:8px; font-size:clamp(1.8rem,4vw,3rem); letter-spacing:-.06em; } h2 { font-size:1.1rem; }
-    .hero p:not(.eyebrow) { color:var(--muted); }
-    .log-entry { display:flex; gap:10px; align-items:flex-end; margin-top:24px; }
-    .log-entry textarea { min-height:106px; flex:1; resize:vertical; border:1px solid var(--line); border-radius:14px; padding:14px; color:var(--ink); }
-    .primary { border:0; border-radius:12px; padding:13px 18px; color:white; background:var(--accent); font-weight:800; }
-    .secondary { border:1px solid var(--line); border-radius:10px; padding:8px 12px; color:var(--ink); background:white; }
-    .dashboard-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:18px; }
-    .panel { padding:20px; } .metric { font-size:2rem; font-weight:800; } .muted { color:var(--muted); }
-    .status-pill { display:inline-flex; padding:6px 10px; border-radius:999px; color:var(--ok); background:#eaf7f0; font-weight:800; }
-    .records-list, .review-list, .week-list { display:grid; gap:10px; padding:0; list-style:none; }
-    .record-card, .review-card, .day-card { border:1px solid var(--line); border-radius:12px; padding:13px; background:#fbfdff; }
-    .record-card strong, .day-card strong { display:block; margin-bottom:4px; } .record-meta { color:var(--muted); font-size:.86rem; }
-    .review-card { display:grid; gap:8px; } .review-card label { display:grid; gap:4px; color:var(--muted); font-size:.82rem; }
-    .review-card input, .review-card select { width:100%; border:1px solid var(--line); border-radius:8px; padding:8px; color:var(--ink); background:white; }
-    .review-actions { display:flex; justify-content:space-between; gap:8px; align-items:center; } .review-actions button { font-size:.85rem; }
-    .week-list { grid-template-columns:repeat(7, minmax(100px,1fr)); overflow:auto; } .day-card { min-width:100px; } .day-status { font-size:.78rem; color:var(--muted); }
-    .hidden { display:none !important; } .notice { padding:12px; border-radius:10px; color:#8a4b14; background:#fff2df; }
-    @media (max-width:720px) { .app-shell{padding:14px;} .topbar{align-items:flex-start; flex-direction:column;} .log-entry{display:block;} .log-entry .primary{width:100%; margin-top:8px;} .dashboard-grid{grid-template-columns:1fr;} .week-list{grid-template-columns:repeat(7,130px);} }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LogFit 코치 대시보드</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap">
+<style>
+/* ===== 기본 ===== */
+:root{
+  --bg:#F3F4F6; --card:#FFFFFF; --ink:#111827; --muted:#6B7280; --line:#E5E7EB;
+  --blue:#2563EB; --blue-dark:#1E3A8A; --blue-soft:#EFF6FF;
+  --done-bg:#DCFCE7; --done-fg:#166534;
+  --miss-bg:#FEE2E2; --miss-fg:#991B1B;
+  --adj-bg:#FEF3C7;  --adj-fg:#92400E;
+  --wait-bg:#E5E7EB; --wait-fg:#374151;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans KR',system-ui,sans-serif}
+button{font-family:inherit;cursor:pointer}
+.page{max-width:1200px;margin:0 auto;padding:40px 32px 56px;display:flex;flex-direction:column;gap:28px}
+.card{background:var(--card);border-radius:24px;padding:28px 32px;display:flex;flex-direction:column;gap:20px}
+.card h2{margin:0;font-size:22px;font-weight:800}
+.card .sub{margin:6px 0 0;font-size:14px;color:var(--muted)}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
+.date{font-size:12px;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:24px;align-items:stretch}
+.col-main{flex:2 1 560px;min-width:0}
+.col-side{flex:1 1 320px;min-width:0}
+.chip{font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.chip.done{background:var(--done-bg);color:var(--done-fg)}
+.chip.miss{background:var(--miss-bg);color:var(--miss-fg)}
+.chip.adj{background:var(--adj-bg);color:var(--adj-fg)}
+.chip.wait{background:var(--wait-bg);color:var(--wait-fg)}
+.empty{font-size:14px;color:var(--muted);padding:12px 0}
+
+/* ===== 헤더 ===== */
+.header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:24px}
+.header .eyebrow{font-size:13px;font-weight:700;letter-spacing:.08em;color:#1D4ED8}
+.header h1{margin:10px 0;font-size:40px;line-height:1.2;font-weight:800;letter-spacing:-.02em}
+.header p{margin:0;font-size:16px;color:var(--muted)}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.user-chip{display:flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:10px 18px 10px 12px;box-shadow:0 1px 2px rgba(17,24,39,.06);font-size:14px;font-weight:500}
+.user-chip .avatar{width:28px;height:28px;border-radius:999px;background:#DBEAFE;color:#1E40AF;font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.status{display:flex;align-items:center;gap:8px;font-size:13px;color:#374151}
+.status .dot{width:8px;height:8px;border-radius:999px;background:#16A34A}
+
+/* ===== 입력 바 ===== */
+.ask{display:flex;flex-direction:column;gap:12px;background:#111827;border-radius:20px;padding:18px 16px 16px 24px}
+.ask-line{display:flex;align-items:center;gap:14px}
+.ask label{font-size:13px;color:#9CA3AF;white-space:nowrap}
+.ask input{flex:1 1 200px;min-width:0;background:transparent;border:0;color:#fff;font-size:18px;font-weight:700;font-family:inherit;outline:none}
+.ask .mic{width:48px;height:48px;border-radius:999px;border:0;background:var(--blue);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+.ask-result{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding-left:2px;font-size:13px;color:#D1D5DB}
+.ask-result .chip{background:#1F2937;color:#93C5FD}
+.ask-result .sep{color:#4B5563}
+.ask-result .save{margin-left:auto;height:34px;padding:0 14px;border-radius:10px;border:0;background:#fff;color:#111827;font-weight:700;font-size:13px}
+
+/* ===== 판단 로그 ===== */
+.log-item{display:flex;gap:16px;padding:16px 0;border-top:1px solid var(--line)}
+[data-logfit="decision-log"]{overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.log-time{width:56px;flex:0 0 56px;font-size:13px;font-weight:700;padding-top:2px}
+.log-body{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:8px}
+.log-title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:15px;font-weight:700}
+.log-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 20px;font-size:13px}
+.log-grid div{display:flex;gap:8px}
+.log-grid .k{color:#9CA3AF;flex:0 0 28px}
+.log-grid .v{color:#374151}
+.log-tools{font-size:12px;color:var(--muted)}
+
+/* ===== 다음 제안 ===== */
+.next{background:var(--blue-dark);color:#fff;border-radius:24px;padding:28px;display:flex;flex-direction:column;gap:18px}
+.next .eyebrow{font-size:12px;font-weight:700;letter-spacing:.08em;color:#BFDBFE}
+.next h2{margin:8px 0 0;font-size:24px;font-weight:800;line-height:1.3}
+.next-lines{display:flex;flex-direction:column;gap:10px;font-size:14px;line-height:1.5;color:#DBEAFE}
+.next-lines div{display:flex;gap:10px}
+.next-lines .k{flex:0 0 36px;color:#93C5FD}
+.next-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:auto}
+.next-actions button{height:46px;border-radius:12px;font-weight:700;font-size:14px}
+.btn-primary{flex:1 1 100px;border:0;background:#fff;color:var(--blue-dark)}
+.btn-ghost{flex:1 1 80px;border:1px solid #93C5FD;background:transparent;color:#fff}
+.btn-ghost.small{flex:0 0 auto;padding:0 16px}
+
+/* ===== 주간 계획 vs 실제 ===== */
+.week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}
+.day{display:flex;flex-direction:column;gap:8px}
+.day .name{font-size:12px;font-weight:700;color:var(--muted);text-align:center}
+.day .plan,.day .act{border-radius:12px;padding:10px 6px;font-size:12px;font-weight:700;text-align:center;display:flex;align-items:center;justify-content:center}
+.day .plan{background:#F3F4F6;color:#374151;min-height:40px}
+.day .plan.future{background:var(--blue-soft)}
+.day .act{flex-direction:column;gap:4px;min-height:64px}
+.day .act.done{background:var(--done-bg);color:var(--done-fg)}
+.day .act.miss{background:var(--miss-bg);color:var(--miss-fg)}
+.day .act.adj{background:var(--adj-bg);color:var(--adj-fg)}
+.day .act.wait{background:var(--wait-bg);color:var(--wait-fg)}
+.legend{display:flex;gap:18px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:middle}
+.balance{display:flex;flex-direction:column;gap:10px;padding-top:8px;border-top:1px solid var(--line)}
+.balance .t{font-size:13px;font-weight:700;color:#374151}
+.bar{display:flex;align-items:center;gap:12px;font-size:13px}
+.bar .n{flex:0 0 48px;font-weight:700}
+.bar .track{flex:1 1 0;height:10px;border-radius:999px;background:#F3F4F6;overflow:hidden}
+.bar .fill{height:100%;border-radius:999px}
+.bar .l{flex:0 0 64px;color:var(--muted);text-align:right}
+
+/* ===== 제안과 응답 ===== */
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{background:#F3F4F6;border-radius:14px;padding:14px 16px}
+.tile .k{font-size:12px;color:var(--muted)}
+.tile .v{font-size:26px;font-weight:800}
+.tile.accent{background:var(--blue-soft)}
+.tile.accent .k,.tile.accent .v{color:#1E40AF}
+.reply{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #F3F4F6;font-size:13px}
+.reply .t{font-weight:700}
+.reply .w{color:var(--muted);font-size:12px}
+
+/* ===== 학습된 선호 / 나의 변화 ===== */
+.mem{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mem .m{border:1px solid var(--line);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.mem .m .r{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:700}
+.mem .m .r span{font-size:11px;color:var(--muted);font-weight:400;white-space:nowrap}
+.mem .m .f{font-size:13px;color:var(--muted)}
+.stat{display:flex;justify-content:space-between;align-items:baseline;background:#F3F4F6;border-radius:14px;padding:14px 16px}
+.stat .k{font-size:13px;color:var(--muted)}
+.stat .v{font-size:22px;font-weight:800}
+.stat .v small{font-size:13px;font-weight:500;color:var(--muted)}
+.note{margin:0;font-size:12px;color:#9CA3AF}
+
+/* ===== 한 화면 보드 ===== */
+.header-left{min-width:0}
+.header h1{white-space:nowrap}
+.board{display:flex;flex-direction:column;gap:20px}
+.area-log [data-logfit="decision-log"]{min-height:0}
+.next .next-top{display:flex;flex-direction:column;gap:14px}
+.next .next-body{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:16px;border-top:1px solid rgba(191,219,254,.25)}
+.next-body-head{display:flex;justify-content:space-between;align-items:baseline;font-size:15px;font-weight:800}
+.next-body-head .hint{font-size:12px;font-weight:500;color:#93C5FD}
+.next .body-stats{display:flex;flex-direction:column;gap:8px}
+.next .stat{background:rgba(255,255,255,.08)}
+.next .stat .k{color:#BFDBFE}
+.next .stat .v{color:#fff}
+.next .stat .v small{color:#BFDBFE}
+.next .note{color:#93C5FD}
+.legend i.dashed{background:#fff;border:1.5px dashed #9CA3AF}
+.day .plan.unplanned{background:#fff;border:1.5px dashed #9CA3AF;color:#374151;font-size:15px;gap:2px}
+.day .plan.unplanned small{font-size:11px;font-weight:700}
+.reply-list{border-top:1px solid var(--line)}
+.next-lines .asof{display:block;margin-top:4px;font-size:11px;color:#93C5FD}
+.title-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.csv-btn{height:30px;padding:0 12px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);font-weight:700;font-size:12px;white-space:nowrap}
+.memory-block{display:flex;flex-direction:column;gap:8px}
+.mini-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px;font-weight:800}
+.mini-head .hint{font-size:11px;font-weight:500;color:var(--muted)}
+.log-grid .v{min-width:0;overflow-wrap:anywhere}
+.log-title{overflow-wrap:anywhere}
+[data-logfit="decision-log"]{overflow-x:hidden}
+
+@media (min-width:1100px) and (min-height:680px){
+  .page{max-width:1480px;padding:14px 28px;gap:12px}
+  .header{flex-wrap:nowrap;align-items:flex-end}
+  .header .eyebrow{font-size:12px}
+  .header h1{margin:2px 0 0;font-size:26px}
+  .header p{font-size:13px}
+  .header-right{flex-direction:row;align-items:center;gap:14px}
+  .ask{padding:8px 10px 8px 20px;border-radius:16px;gap:8px}
+  .ask input{font-size:16px}
+  .ask .mic{width:36px;height:36px}
+  .board{flex:1 1 auto;min-height:0;display:grid;gap:12px;
+    grid-template-columns:minmax(0,7fr) minmax(0,3fr);
+    grid-template-rows:auto auto;align-items:stretch;
+    grid-template-areas:"log next" "week replies"}
+  .area-log{grid-area:log}.area-week{grid-area:week}.area-next{grid-area:next}.area-replies{grid-area:replies}
+  .card{padding:14px 20px;gap:10px;border-radius:20px;min-height:0}
+  .card h2{font-size:18px}
+  .card .sub{margin-top:2px;font-size:12px}
+  .log-item{padding:10px 0;gap:12px}
+  .log-title{font-size:14px}
+  .log-grid{font-size:12px}
+  .day .plan{min-height:34px;padding:6px 4px}
+  .day{gap:6px}
+  .day .act{min-height:44px;padding:5px 4px;gap:2px}
+  .day .act svg{width:20px;height:20px}
+  .week{gap:6px}
+  .balance{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 16px;padding-top:6px}
+  .balance .t{grid-column:1/-1}
+  .bar{gap:8px;font-size:12px}
+  .bar .n{flex:0 0 auto}
+  .bar .l{flex:0 0 auto;font-size:11px}
+  .bar .track{height:8px}
+  .next{padding:16px 20px;border-radius:20px;gap:12px;min-height:0;overflow:auto}
+  .next h2{font-size:20px}
+  .next-lines{font-size:13px}
+  .next .stat{padding:7px 14px;border-radius:10px}
+  .next .stat .v{font-size:17px}
+  .next .body-stats{gap:6px}
+  .next .next-body{padding-top:12px;gap:8px}
+  .next .next-top{gap:10px}
+  .tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .tile{padding:6px 10px;border-radius:10px}
+  .tile .k{font-size:11px}
+  .tile .v{font-size:18px !important}
+  .area-replies{overflow:auto}
+  .reply-list{max-height:96px;overflow:auto;flex:0 0 auto}
+  .reply{padding:6px 0}
+  .area-replies .card-head .sub{display:none}
+  .memory-block{gap:4px}
+  .memory-block .mini-head{font-size:13px}
+  .mem{gap:8px}
+  .mem .m{padding:10px 12px;border-radius:12px}
+  .memory-block .empty{padding:0;font-size:13px}
+}
+
+@media (max-width:768px){
+  .page{padding:24px 16px 40px}
+  .header h1{font-size:22px;white-space:normal}
+  .log-grid,.mem,.tiles{grid-template-columns:1fr}
+  .week{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+  .day .plan,.day .act{font-size:10px}
+}
+</style>
 </head>
 <body>
-  <main class="app-shell">
-    <header class="topbar"><div class="brand"><span class="brand-mark">L</span><span>LogFit</span></div><nav class="view-switch" aria-label="화면 전환"><button id="logfit-view-btn" aria-pressed="true">LogFit 대시보드</button><button id="platen-view-btn" aria-pressed="false">Platen</button></nav></header>
-    <section id="logfit-view">
-      <div class="hero"><p class="eyebrow">Daily wellness log</p><h1>하루를 한 문장으로 기록하세요</h1><p>식사, 운동, 휴식을 자유롭게 적으면 저장 전에 직접 확인할 수 있어요.</p><div class="log-entry"><textarea id="logfit-input" aria-label="오늘의 기록" placeholder="예: 오늘 점심은 김치찌개를 먹고 저녁에 요가 40분 했어."></textarea><button id="logfit-save-btn" class="primary">기록 확인</button></div></div>
-      <section id="logfit-review" class="panel hidden" aria-live="polite"><h2>저장 전 확인</h2><p class="muted">날짜와 내용을 확인하고 필요하면 수정하거나 삭제하세요.</p><p id="logfit-review-notice" class="notice hidden" role="alert"></p><div id="logfit-review-list" class="review-list"></div><button id="logfit-confirm-btn" class="primary">확인한 기록 저장</button></section>
-      <div class="dashboard-grid"><section class="panel"><h2>오늘의 요약</h2><div id="logfit-meal-count" class="metric">0</div><p class="muted">식사 기록</p><div id="logfit-exercise-minutes" class="metric">0분</div><p class="muted">기록된 운동 시간</p></section><section class="panel"><h2>대표 상태</h2><div id="logfit-status" class="status-pill">미기록</div><p id="logfit-feedback" class="muted">오늘의 확인된 기록이 없습니다.</p></section><section class="panel"><h2>세부 기록</h2><div id="logfit-records"><p class="muted">아직 저장된 기록이 없습니다.</p></div></section></div>
-      <section class="panel"><div class="topbar"><div><h2>최근 7일 리포트</h2><p class="muted">기록한 날짜 기준으로 집계합니다.</p></div><button id="logfit-export-btn" class="secondary">CSV 내보내기 (검증용)</button></div><div id="logfit-week" class="week-list"></div></section>
+<div class="page">
+
+  <!-- 헤더 -->
+  <header class="header">
+    <div class="header-left">
+      <div class="eyebrow">LOGFIT 2.0 · 개인 Wellness Agent</div>
+      <div class="title-line">
+        <h1>자율 운동 코치 에이전트</h1>
+        <p>날씨·일정·기록을 보고 먼저 제안하고, 그 판단 근거를 여기에 남깁니다.</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status"><span class="dot"></span><span data-logfit="status">LogFit 데이터 연결 확인 중</span></div>
+      <div class="user-chip"><span class="avatar">지</span>지혜님</div>
+    </div>
+  </header>
+
+  <!-- 입력 바: 기록/요청 통합. data-logfit="ask-result"는 판별 결과가 있을 때만 표시 -->
+  <form class="ask">
+    <div class="ask-line">
+      <label for="ask">한 문장으로 기록하거나 요청</label>
+      <input id="ask" type="text" placeholder="오늘 점심 김치찌개, 저녁 요가 40분 했어">
+      <button type="submit" class="mic" aria-label="음성으로 입력">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+      </button>
+    </div>
+    <div class="ask-result" data-logfit="ask-result">
+      <span class="chip">코치 판별: 기록 2건</span>
+      <span>🍚 식사 · 점심 김치찌개</span><span class="sep">|</span>
+      <span>🧘‍♀️ 운동 · 요가 40분 · 저녁</span>
+      <button type="button" class="save">확인하고 저장</button>
+    </div>
+  </form>
+
+  <!-- 한 화면 보드 (7:3): 판단 로그 | 제안+신체 / 이번 주 계획 vs 실제 | 제안과 응답+학습된 선호 -->
+  <main class="board">
+    <section class="card area-log">
+      <div class="card-head">
+        <div><h2>오늘의 판단 로그</h2><p class="sub">입력 → 결정 → 근거. 코치가 왜 그렇게 했는지 남깁니다.</p></div>
+        <span class="date" data-logfit="today"></span>
+      </div>
+      <div data-logfit="decision-log"><div class="empty">판단 로그를 불러오는 중이에요.</div></div>
     </section>
-    <section id="platen-view" class="panel hidden"><h1>Platen</h1><p>기존 Platen 화면 자리입니다. LogFit 대시보드와 독립적으로 전환됩니다.</p></section>
+
+    <aside class="next area-next">
+      <div class="next-top" data-logfit="next-suggestion"><div class="empty" style="color:#BFDBFE">제안을 불러오는 중이에요.</div></div>
+      <div class="next-body">
+        <div class="next-body-head"><span>나의 변화</span><span class="hint">최근 신체 기록</span></div>
+        <div class="body-stats" data-logfit="body-stats"></div>
+      </div>
+    </aside>
+
+    <section class="card area-week">
+      <div class="card-head">
+        <div><h2>이번 주 계획 vs 실제</h2><p class="sub" data-logfit="week-sub">계획과 실제 수행</p></div>
+        <span class="date" data-logfit="week-range"></span>
+      </div>
+      <div class="week" data-logfit="week"></div>
+      <div class="legend">
+        <span>위: 계획</span><span>아래: 실제</span>
+        <span><i style="background:var(--done-bg)"></i>완료</span>
+        <span><i style="background:var(--miss-bg)"></i>미수행</span>
+        <span><i style="background:var(--adj-bg)"></i>재조정</span>
+        <span><i class="dashed"></i>계획 없이 한 운동</span>
+      </div>
+      <div class="balance" data-logfit="balance"></div>
+    </section>
+
+
+    <section class="card area-replies">
+      <div class="card-head">
+        <div><h2>제안과 응답</h2><p class="sub">최근 7일 · 학습 루프의 입력</p></div>
+        <button type="button" class="csv-btn" data-export>CSV 내보내기</button>
+      </div>
+      <div class="tiles" data-logfit="suggestion-stats"></div>
+      <div class="reply-list" data-logfit="suggestion-list"></div>
+      <div class="memory-block">
+        <div class="mini-head"><span>학습된 선호</span><span class="hint">Hermes 메모리</span></div>
+        <div class="mem" data-logfit="memory-rules"></div>
+      </div>
+    </section>
   </main>
-  <script>
+</div>
+
+<script>
     'use strict';
 
     var LOGFIT_TIME_ZONE = 'Asia/Seoul';
@@ -99,6 +352,12 @@
       if (explicit) {
         var date = [explicit[1], String(explicit[2]).padStart(2, '0'), String(explicit[3]).padStart(2, '0')].join('-');
         return { date: date, certainty: 'certain', future: date > today };
+      }
+      var monthDay = source.match(/(?:^|\s)(\d{1,2})\s*월\s*(\d{1,2})\s*일?/);
+      if (monthDay) {
+        var currentYear = getKstParts(now).year;
+        var monthDayDate = [String(currentYear), String(monthDay[1]).padStart(2, '0'), String(monthDay[2]).padStart(2, '0')].join('-');
+        return { date: monthDayDate, certainty: 'certain', future: monthDayDate > today };
       }
       if (/며칠\s*전|주말에?|이번\s*주말/.test(source)) return { date: null, certainty: 'uncertain', future: false };
       if (/그저께|그제/.test(source)) {
@@ -175,18 +434,19 @@
         var period = piece.match(/^(?:(?:오늘|어제|그저께|그제)\s*)?(아침|점심|저녁|간식)(?:에|은|는|으로)?\s*/);
         var lower = piece;
         var isRest = /(휴식|쉬었|쉬어|푹\s*잤|휴식을)/.test(lower);
-        var isExercise = /(운동|요가|걷기|걷고|달리기|러닝|조깅|수영|자전거|사이클|헬스|필라테스|근력|등산|줄넘기)/.test(lower);
-        var duration = piece.match(/(\d+(?:\.\d+)?)\s*(시간|분)/);
+        var isExercise = /(운동|요가|걷기|걷고|달리기|러닝|조깅|수영|자전거|사이클|헬스|필라테스|근력|등산|줄넘기|animal\s*flow(?:\s*yoga)?|yoga|running|jogging|swimming|cycling|walking|pilates|strength|workout|exercise|hiking|jump\s*rope)/i.test(lower);
+        var duration = piece.match(/(?:(\d+(?:\.\d+)?)\s*시간)(?:\s*(\d+(?:\.\d+)?)\s*분)?|(?<!시\s)(?<!시)(?<!\d)(\d+(?:\.\d+)?)\s*분/);
+        var durationMinutes = duration ? (duration[1] ? Number(duration[1]) * 60 + (duration[2] ? Number(duration[2]) : 0) : Number(duration[3])) : null;
         if (isRest && !isExercise) {
           records.push(normalizeLogFitRecord({ type: 'rest', raw_text: rawText, source_fragment: piece, record_date: resolution.date, date_certainty: resolution.certainty, completion: resolution.certainty === 'uncertain' || hasUnclearLogFitCompletion(piece) ? 'uncertain' : 'completed', item: cleanLogFitItem(piece) }, created));
           return;
         }
         if (isExercise) {
-          var exerciseTypeMatch = piece.match(/(요가|걷기|달리기|러닝|조깅|수영|자전거|사이클|헬스|필라테스|근력|등산|줄넘기)/);
+          var exerciseTypeMatch = piece.match(/(요가|걷기|달리기|러닝|조깅|수영|자전거|사이클|헬스|필라테스|근력|등산|줄넘기|animal\s*flow(?:\s*yoga)?|yoga|running|jogging|swimming|cycling|walking|pilates|strength|workout|exercise|hiking|jump\s*rope)/i);
           var exerciseType = exerciseTypeMatch ? exerciseTypeMatch[1] : null;
           var planned = /(할\s*예정|할\s*거야?|하려고|계획|예정|하고\s*싶)/.test(piece);
           var completion = resolution.certainty === 'uncertain' || hasUnclearLogFitCompletion(piece) ? 'uncertain' : (planned || resolution.future ? 'planned' : 'completed');
-          records.push(normalizeLogFitRecord({ type: 'exercise', raw_text: rawText, source_fragment: piece, record_date: resolution.date, date_certainty: resolution.certainty, exercise_type: exerciseType, duration_min: duration ? Number(duration[1]) * (duration[2] === '시간' ? 60 : 1) : null, completion: completion, item: cleanLogFitItem(piece) }, created));
+          records.push(normalizeLogFitRecord({ type: 'exercise', raw_text: rawText, source_fragment: piece, record_date: resolution.date, date_certainty: resolution.certainty, exercise_type: exerciseType, duration_min: durationMinutes, completion: completion, item: cleanLogFitItem(piece) }, created));
           return;
         }
         if (period || /(먹|마시|식사|아침|점심|저녁|간식)/.test(piece)) {
@@ -194,6 +454,175 @@
         }
       });
       return { rawText: rawText, records: records };
+    }
+
+    function logFitScheduleId() {
+      return 'schedule-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    }
+
+    // Date of a planned workout: explicit date, 내일/모레, or the next matching weekday; otherwise today.
+    function resolveLogFitPlanDate(text, now) {
+      var source = String(text || '');
+      var today = getKstDate(now);
+      if (/(20\d{2})\s*[년./-]\s*\d{1,2}\s*[월./-]\s*\d{1,2}|(?:^|\s|[^\d])\d{1,2}\s*월\s*\d{1,2}\s*일?/.test(source)) {
+        var monthDay = source.match(/(\d{1,2})\s*월\s*(\d{1,2})\s*일?/);
+        if (monthDay && !/(20\d{2})\s*[년./-]/.test(source)) return [String(getKstParts(now).year), String(monthDay[1]).padStart(2, '0'), String(monthDay[2]).padStart(2, '0')].join('-');
+        return resolveLogFitDate(source, now).date || today;
+      }
+      if (/모레/.test(source)) return addKstDays(today, 2);
+      if (/내일/.test(source)) return addKstDays(today, 1);
+      var weekday = source.match(/(다음\s*주\s*)?(일|월|화|수|목|금|토)요일/);
+      if (weekday) {
+        var target = '일월화수목금토'.indexOf(weekday[2]);
+        var diff = (target - getKstParts(now).weekday + 7) % 7;
+        if (weekday[1]) diff += 7;
+        return addKstDays(today, diff);
+      }
+      return today;
+    }
+
+    function parseLogFitPlanIntent(text, now) {
+      var rawText = String(text || '').trim();
+      var created = logFitDateValue(now);
+      var exerciseMatch = rawText.match(/(요가|걷기|달리기|러닝|조깅|수영|자전거|사이클|헬스|필라테스|근력|등산|줄넘기|운동|animal\s*flow(?:\s*yoga)?|yoga|running|jogging|swimming|cycling|walking|pilates|strength|workout|exercise|hiking|jump\s*rope)/i);
+      var planned = /(할\s*예정|할\s*거야?|하려고|계획|예정|하고\s*싶|하러\s*갈|갈\s*거야)/.test(rawText);
+      if (!exerciseMatch || !planned) return { intent: 'unknown', activity_type: null, activity_name: null, planned_start_at: null, status: 'needs_review', raw_text: rawText };
+      var planDate = resolveLogFitPlanDate(rawText, created);
+      // Only "N시" counts as a time; "11월8일" style dates must not be read as hours.
+      var timeMatch = rawText.match(/(?:오전|오후|새벽|아침|저녁|밤)?\s*(\d{1,2})\s*(?:시|:)\s*(?:(\d{1,2})\s*분?)?/);
+      var hour = timeMatch ? Number(timeMatch[1]) : null;
+      var minute = timeMatch && timeMatch[2] ? Number(timeMatch[2]) : 0;
+      if (timeMatch && /(오후|저녁|밤)/.test(rawText) && hour < 12) hour += 12;
+      var plannedStartAt = null;
+      if (hour !== null && hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59) {
+        plannedStartAt = planDate + 'T' + String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0') + ':00+09:00';
+      }
+      var partOfDay = rawText.match(/(새벽|아침|오전|점심|오후|저녁|밤)/);
+      var distance = rawText.match(/(\d+(?:\.\d+)?)\s*(?:km|킬로)/i);
+      var minutes = rawText.match(/(\d+)\s*분/);
+      var hours = rawText.match(/(\d+(?:\.\d+)?)\s*시간/);
+      return {
+        intent: 'planned', activity_type: 'exercise', activity_name: exerciseMatch[1],
+        plan_date: planDate,
+        time_label: partOfDay ? partOfDay[1] : null,
+        distance_km: distance ? Number(distance[1]) : null,
+        duration_min: minutes && !timeMatch ? Number(minutes[1]) : hours ? Math.round(Number(hours[1]) * 60) : null,
+        planned_start_at: plannedStartAt,
+        status: plannedStartAt ? 'awaiting_user_approval' : 'awaiting_time_confirmation',
+        raw_text: rawText, timezone: LOGFIT_TIME_ZONE
+      };
+    }
+
+    function buildWeatherSuggestion(schedule, forecast, preferences) {
+      var input = forecast || null;
+      if (!input || !Number.isFinite(Number(input.precipitation_probability))) {
+        return { weather_status: 'unavailable', recommended_action: 'run_as_planned', reason_codes: ['weather_unavailable'], message: '날씨 정보를 확인하지 못했어요. 원래 계획을 기준으로 일정을 검토해 주세요.' };
+      }
+      var probability = Number(input.precipitation_probability);
+      var isRunning = schedule && schedule.activity_type === 'running';
+      if (isRunning && probability >= 60 && input.precipitation_type === 'rain') {
+        return { weather_status: 'available', recommended_action: 'indoor_alternative', reason_codes: ['rain_expected'], message: '비 예보가 있어요. 시간을 앞당기거나 실내 운동으로 바꿀까요?', forecast: input };
+      }
+      return { weather_status: 'available', recommended_action: 'run_as_planned', reason_codes: [], message: '현재 날씨 기준으로 원래 운동 계획을 검토해도 좋아요.', forecast: input };
+    }
+
+    function createScheduleDraft(plan, context) {
+      var options = context || {};
+      var start = plan && plan.planned_start_at ? new Date(plan.planned_start_at) : null;
+      var reminderMinutes = Number.isFinite(Number(options.reminder_minutes_before)) ? Number(options.reminder_minutes_before) : 30;
+      var reminderAt = start ? new Date(start.getTime() - reminderMinutes * 60000).toISOString() : null;
+      return {
+        schedule_id: plan.schedule_id || (plan.schedule_id = logFitScheduleId()), activity_type: plan.activity_type, activity_name: plan.activity_name,
+        planned_start_at: plan.planned_start_at || null, reminder_at: reminderAt,
+        expected_duration_min: options.expected_duration_min || null, status: plan.planned_start_at ? 'awaiting_user_approval' : 'awaiting_time_confirmation',
+        timezone: options.timezone || LOGFIT_TIME_ZONE, cron_job_id: null, notification_channel: options.notification_channel || 'telegram',
+        notification_status: 'pending', linked_record_id: null, created_at: new Date().toISOString()
+      };
+    }
+
+    function promoteScheduleCompletion(schedule, completionInput, records) {
+      var current = Object.assign({}, schedule || {});
+      var existing = Array.isArray(records) ? records.slice() : [];
+      var input = completionInput || {};
+      if (current.status === 'completed' || existing.some(function (record) { return record.linked_schedule_id === current.schedule_id; })) {
+        current.status = 'completed';
+        return { schedule: current, records: existing };
+      }
+      if (input.status !== 'completed') return { schedule: current, records: existing };
+      var record = normalizeLogFitRecord({ type: 'exercise', raw_text: current.activity_name, exercise_type: current.activity_name, duration_min: input.duration_min === undefined ? current.expected_duration_min : input.duration_min, record_date: current.planned_start_at ? current.planned_start_at.slice(0, 10) : getKstDate(), completion: 'completed' }, new Date());
+      record.linked_schedule_id = current.schedule_id;
+      current.status = 'completed';
+      current.linked_record_id = record.id;
+      return { schedule: current, records: existing.concat(record) };
+    }
+
+    function fetchWeatherForecast(schedule, fetchImpl) {
+      var requester = fetchImpl || (typeof fetch === 'function' ? fetch : null);
+      if (!requester || !schedule || !schedule.planned_start_at) return Promise.resolve(null);
+      var latitude = 37.5665;
+      var longitude = 126.9780;
+      var target = schedule.planned_start_at.slice(0, 13);
+      var url = 'https://api.open-meteo.com/v1/forecast?latitude=' + latitude + '&longitude=' + longitude + '&hourly=temperature_2m,precipitation_probability,precipitation,rain,showers,snowfall,wind_speed_10m&timezone=Asia%2FSeoul&forecast_days=3';
+      return requester(url).then(function (response) { if (!response.ok) throw new Error('weather_http_' + response.status); return response.json(); }).then(function (data) {
+        var hourly = data && data.hourly ? data.hourly : {};
+        var index = Array.isArray(hourly.time) ? hourly.time.findIndex(function (value) { return String(value).slice(0, 13) === target; }) : -1;
+        if (index < 0) throw new Error('weather_hour_missing');
+        var precipitation = Number(hourly.precipitation_probability[index]);
+        var rain = Number(hourly.rain && hourly.rain[index]);
+        var showers = Number(hourly.showers && hourly.showers[index]);
+        var snowfall = Number(hourly.snowfall && hourly.snowfall[index]);
+        return { temperature_c: Number(hourly.temperature_2m[index]), precipitation_probability: precipitation, precipitation_type: (rain > 0 || showers > 0) ? 'rain' : (snowfall > 0 ? 'snow' : 'none'), wind_speed_kmh: Number(hourly.wind_speed_10m[index]), source: 'Open-Meteo', fetched_at: new Date().toISOString(), location: '서울(기본값)' };
+      }).catch(function () { return null; });
+    }
+
+    function saveLogFitSchedule(schedule) {
+      var key = 'logfit.schedules.v1';
+      var existing = [];
+      try { existing = JSON.parse(localStorage.getItem(key) || '[]'); } catch (error) { existing = []; }
+      if (!Array.isArray(existing)) existing = [];
+      var index = existing.findIndex(function (item) { return item.schedule_id === schedule.schedule_id; });
+      if (index >= 0) existing[index] = schedule; else existing.push(schedule);
+      localStorage.setItem(key, JSON.stringify(existing));
+      return existing;
+    }
+
+    function renderPlanReview(plan) {
+      var section = document.getElementById('logfit-plan-review');
+      var summary = document.getElementById('logfit-plan-summary');
+      var timeInput = document.getElementById('logfit-plan-time');
+      var approve = document.getElementById('logfit-plan-approve-btn');
+      var notice = document.getElementById('logfit-plan-notice');
+      if (!section || !summary || !timeInput || !approve) return;
+      logFitPlanDraft = plan;
+      section.classList.remove('hidden');
+      summary.innerHTML = '<strong>' + logFitEscapeHtml(plan.activity_name) + '</strong><span class="muted">' + (plan.planned_start_at ? '예정 시각을 확인해 주세요.' : '“저녁”만으로는 정확한 시각을 정하지 않았어요.') + '</span>';
+      timeInput.value = plan.planned_start_at ? plan.planned_start_at.slice(0, 16) : '';
+      approve.disabled = !plan.planned_start_at;
+      if (notice) { notice.textContent = plan.planned_start_at ? '' : '시작 시간을 입력하면 날씨를 확인할 수 있어요.'; notice.classList.toggle('hidden', Boolean(plan.planned_start_at)); }
+      var title = document.getElementById('logfit-weather-title');
+      var message = document.getElementById('logfit-weather-message');
+      var meta = document.getElementById('logfit-weather-meta');
+      if (title) title.textContent = '날씨 제안 대기';
+      if (message) message.textContent = plan.planned_start_at ? '날씨를 확인하고 있어요.' : '운동 시간을 정하면 날씨를 확인해 제안할게요.';
+      if (meta) meta.textContent = '위치: 서울(기본값) · 일정 승인 전';
+      if (plan.planned_start_at) updatePlanWeatherSuggestion();
+    }
+
+    function updatePlanWeatherSuggestion() {
+      if (!logFitPlanDraft || !logFitPlanDraft.planned_start_at) return;
+      var schedule = createScheduleDraft(logFitPlanDraft, { reminder_minutes_before: 30, timezone: LOGFIT_TIME_ZONE });
+      fetchWeatherForecast(schedule).then(function (forecast) {
+        var suggestion = buildWeatherSuggestion(schedule, forecast, {});
+        var title = document.getElementById('logfit-weather-title');
+        var message = document.getElementById('logfit-weather-message');
+        var meta = document.getElementById('logfit-weather-meta');
+        if (title) title.textContent = suggestion.weather_status === 'available' ? '날씨 기반 제안' : '날씨 확인 필요';
+        if (message) message.textContent = suggestion.message;
+        if (meta) meta.textContent = suggestion.weather_status === 'available' ? '출처: ' + suggestion.forecast.source + ' · ' + suggestion.forecast.location + ' · 추정 정보' : '날씨 API 응답이 없어 원래 계획을 유지할 수 있어요.';
+        logFitPlanDraft.weather_suggestion = suggestion;
+        var approve = document.getElementById('logfit-plan-approve-btn');
+        if (approve) approve.disabled = false;
+      });
     }
 
     function getRepresentativeStatus(records) {
@@ -236,9 +665,61 @@
 
     var LOGFIT_STORAGE_KEY = 'logfit.records.v1';
     var logFitDraftRecords = [];
+    var logFitPlanDraft = null;
+
+    function logFitActivityEmoji(record) {
+      if (record.type === 'meal') return '🍚';
+      if (record.type === 'rest') return '😴';
+      var value = String(record.exercise_type || record.activity_name || '');
+      if (/러닝|조깅|달리|유산소/.test(value)) return '🏃‍♀️';
+      if (/요가/.test(value)) return '🧘‍♀️';
+      return '💪';
+    }
+
+    function classifyLogFitInput(text) {
+      var source = String(text || '').trim();
+      var record = /(먹었어|먹었다|먹었어요|마셨어|마셨다|했어|했다|했어요|했(?:고|으며|지만)|완료|진행|기록했|남겼|쉬었어|쉬었다|기록해)/.test(source);
+      var schedule = /(?:할\s*거야|할\s*예정|할\s*계획|하러\s*갈|갈\s*거야|뛸\s*거야|계획은|계획이야|예정이야)/.test(source) && !/(계획\s*(세워|짜)|추천|정해|알려|잡아)/.test(source);
+      var request = /(계획\s*(세워|짜)|추천해|추천\s*해|정해\s*줘|알려\s*줘|운동\s*시간|일정\s*(잡아|짜)|리마인드|알림\s*(보내|설정))/.test(source);
+      var kinds = [];
+      if (record) kinds.push('record');
+      if (schedule) kinds.push('schedule');
+      if (request) kinds.push('request');
+      if (kinds.length > 1) return { kind: 'mixed', kinds: kinds, reason: 'multiple_intents' };
+      if (record) return { kind: 'record', reason: 'completion_language' };
+      if (schedule) return { kind: 'schedule', reason: 'future_personal_plan' };
+      if (request) return { kind: 'request', reason: 'planning_request' };
+      return { kind: 'other', reason: 'no_supported_intent' };
+    }
+
+    function logFitDisplayName(record) {
+      var name = record.type === 'meal' ? ((record.meal_period ? record.meal_period + ' ' : '') + (record.item || '식사')) : record.type === 'exercise' ? (record.exercise_type || '근력운동') : '휴식';
+      if (/하체/.test(String(record.raw_text || '')) && /근력/.test(String(record.raw_text || ''))) name = '하체 근력운동';
+      return logFitActivityEmoji(record) + ' ' + name;
+    }
 
     function logFitEscapeHtml(value) {
       return String(value === null || value === undefined ? '' : value).replace(/[&<>"']/g, function (character) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]; });
+    }
+
+    function renderCoachAgentState(state) {
+      var events = Array.isArray(state && state.events) ? state.events : [];
+      var logs = document.getElementById('logfit-decision-log-list');
+      var decisionEvents = events.filter(function (event) { return event.event_type === 'decision_log'; }).slice(-8).reverse();
+      if (logs) logs.innerHTML = decisionEvents.length ? '<div class="records-list">' + decisionEvents.map(function (event) { var metadata = event.metadata || {}; var decision = metadata.decision_log || {}; return '<div class="record-card"><strong>' + logFitEscapeHtml(decision.decision || metadata.kind || '판단') + ' · ' + logFitEscapeHtml(decision.status || metadata.status || '') + '</strong><span class="record-meta">' + logFitEscapeHtml(decision.reason || metadata.message || '근거 기록 없음') + '</span><small class="record-meta">도구: ' + logFitEscapeHtml((decision.tools || []).join(', ')) + '</small></div>'; }).join('') + '</div>' : '<p class="muted">아직 오늘의 판단 로그가 없습니다.</p>';
+      var pending = events.map(function (event) { return event.metadata || {}; }).reverse().find(function (metadata) { return metadata.suggestion && metadata.suggestion.response === 'none'; });
+      var suggestionPanel = document.getElementById('logfit-next-suggestion');
+      if (suggestionPanel) suggestionPanel.classList.toggle('hidden', !pending);
+      if (pending) {
+        var reason = document.getElementById('logfit-suggestion-reason');
+        var options = document.getElementById('logfit-suggestion-options');
+        if (reason) reason.textContent = pending.suggestion.reason || '판단 근거를 확인해 주세요.';
+        if (options) options.innerHTML = (pending.suggestion.options || []).map(function (option) { var emoji = option.activity === '러닝' ? '🏃‍♀️' : option.activity === '요가' ? '🧘‍♀️' : '💪'; return '<div class="record-card"><strong>' + logFitEscapeHtml(option.label + ' · ' + emoji + ' ' + option.time + ' ' + option.activity + ' ' + option.duration_min + '분') + '</strong><span class="record-meta">' + (option.indoor ? '실내' : '야외') + '</span></div>'; }).join('');
+      }
+      var suggestions = events.map(function (event) { return event.metadata && event.metadata.suggestion; }).filter(Boolean);
+      var accepted = suggestions.filter(function (suggestion) { return suggestion.response === 'accepted'; }).length;
+      var metric = document.getElementById('logfit-coaching-metrics-values');
+      if (metric) metric.innerHTML = '<div class="metric"><label>제안</label><b>' + suggestions.length + '건</b></div><div class="metric"><label>수용</label><b>' + accepted + '건</b></div><div class="metric"><label>수용률</label><b>' + (suggestions.length ? Math.round(accepted / suggestions.length * 100) : 0) + '%</b></div>';
     }
 
     function loadLogFitRecords() {
@@ -247,6 +728,33 @@
         var records = stored ? JSON.parse(stored) : [];
         return Array.isArray(records) ? records.map(function (record) { return normalizeLogFitRecord(record, record.created_at); }) : [];
       } catch (error) { return []; }
+    }
+
+    function loadLogFitBridgeRecords() {
+      if (typeof fetch !== 'function') return Promise.resolve([]);
+      return fetch('http://127.0.0.1:8787/api/state').then(function (response) { if (!response.ok) throw new Error('bridge_http_' + response.status); return response.json(); }).then(function (state) {
+        renderCoachAgentState(state);
+        var external = Array.isArray(state.records) ? state.records.map(function (record) {
+          return normalizeLogFitRecord({ id: record.id || record.record_id, type: record.type || 'exercise', raw_text: record.raw_text, record_date: record.record_date, meal_period: record.meal_period, item: record.item || record.activity_name, exercise_type: record.exercise_type || record.activity_name, duration_min: record.duration_min, completion: 'completed', status: 'completed' }, record.created_at);
+        }) : [];
+        var local = loadLogFitRecords();
+        var merged = local.concat(external.filter(function (record) { return !local.some(function (item) { return item.id === record.id; }); }));
+        localStorage.setItem(LOGFIT_STORAGE_KEY, JSON.stringify(merged));
+        return merged;
+      }).catch(function () { return loadLogFitRecords(); });
+    }
+
+    function loadLogFitCalendarWindows() {
+      var panel = document.getElementById('logfit-calendar-panel');
+      var status = document.getElementById('logfit-calendar-status');
+      var windows = document.getElementById('logfit-calendar-windows');
+      if (!panel || !status || !windows || typeof fetch !== 'function') return Promise.resolve(null);
+      panel.classList.remove('hidden');
+      return fetch('http://127.0.0.1:8787/api/calendar/windows').then(function (response) { if (!response.ok) throw new Error('calendar_http_' + response.status); return response.json(); }).then(function (data) {
+        status.textContent = data.connected ? 'Google Calendar의 바쁜 시간을 제외한 후보예요.' : 'Google Calendar가 연결되지 않아 기본 시간으로 제안해요.';
+        windows.innerHTML = data.windows.slice(0, 3).map(function (item) { return '<div class="record-card"><strong>' + logFitEscapeHtml(item.start + ' ~ ' + item.end) + '</strong><span class="record-meta">30분 운동 가능 시간 · ' + logFitEscapeHtml(data.source) + '</span></div>'; }).join('') || '<p class="muted">오늘은 30분 운동 가능 시간을 찾지 못했어요.</p>';
+        return data;
+      }).catch(function () { status.textContent = '캘린더를 확인하지 못해 기본 운동 시간을 사용해요.'; windows.innerHTML = '<div class="record-card"><strong>05:30 ~ 06:00</strong><span class="record-meta">캘린더 미연결 fallback</span></div>'; return null; });
     }
 
     function saveConfirmedLogFitRecords(records, now) {
@@ -268,7 +776,8 @@
       if (container) {
         container.innerHTML = review.length ? review.map(function (record, index) {
           var detail = record.type === 'meal' ? record.item : (record.type === 'exercise' ? record.exercise_type : record.item || '휴식');
-          return '<article class="review-card" data-review-index="' + index + '"><strong>' + logFitEscapeHtml(record.type === 'meal' ? '식사' : record.type === 'exercise' ? '운동' : '휴식') + '</strong>' +
+          var displayName = logFitDisplayName(record);
+          return '<article class="review-card" data-review-index="' + index + '"><strong>' + logFitEscapeHtml(displayName) + '</strong>' +
             '<label>날짜<input data-field="record_date" value="' + logFitEscapeHtml(record.record_date || '') + '" placeholder="확인 필요"></label>' +
             '<label>내용<input data-field="detail" value="' + logFitEscapeHtml(detail) + '"></label>' +
             (record.type === 'exercise' ? '<label>운동 시간(분)<input data-field="duration_min" type="number" min="0" value="' + (record.duration_min === null ? '' : record.duration_min) + '" placeholder="시간 미입력"></label>' : '') +
@@ -336,7 +845,7 @@
       var minutesNode = document.getElementById('logfit-exercise-minutes'); if (minutesNode) minutesNode.textContent = todaySummary.exerciseMinutes + '분';
       var statusNode = document.getElementById('logfit-status'); if (statusNode) statusNode.textContent = todaySummary.status;
       var feedbackNode = document.getElementById('logfit-feedback'); if (feedbackNode) feedbackNode.textContent = feedback + (todaySummary.missingExerciseTimeCount ? ' · 시간 미입력 ' + todaySummary.missingExerciseTimeCount + '건' : '');
-      var recordNode = document.getElementById('logfit-records'); if (recordNode) recordNode.innerHTML = model.records.length ? '<div class="records-list">' + model.records.map(function (record) { var title = record.type === 'meal' ? (record.meal_period ? record.meal_period + ' · ' : '') + record.item : record.type === 'exercise' ? (record.exercise_type || '운동') + (record.duration_min === null ? ' · 시간 미입력' : ' · ' + record.duration_min + '분') : '휴식'; return '<div class="record-card"><strong>' + logFitEscapeHtml(title) + '</strong><span class="record-meta">' + logFitEscapeHtml(record.raw_text) + (record.completion === 'uncertain' ? ' · 확인 필요' : '') + '</span></div>'; }).join('') + '</div>' : '<p class="muted">아직 저장된 기록이 없습니다.</p>';
+      var recordNode = document.getElementById('logfit-records'); if (recordNode) recordNode.innerHTML = model.records.length ? '<div class="records-list">' + model.records.map(function (record) { var title = logFitDisplayName(record) + (record.duration_min === null && record.type === 'exercise' ? ' · 시간 미입력' : ''); return '<div class="record-card"><strong>' + logFitEscapeHtml(title) + '</strong><span class="record-meta">' + logFitEscapeHtml(record.raw_text) + (record.completion === 'uncertain' ? ' · 확인 필요' : '') + '</span></div>'; }).join('') + '</div>' : '<p class="muted">아직 저장된 기록이 없습니다.</p>';
       var weekNode = document.getElementById('logfit-week'); if (weekNode) weekNode.innerHTML = week.days.map(function (day) { return '<div class="day-card"><strong>' + logFitEscapeHtml(day.date.slice(5)) + '</strong><span class="day-status">' + logFitEscapeHtml(day.status) + '</span><div>' + day.exerciseMinutes + '분 · 식사 ' + day.mealCount + '</div></div>'; }).join('');
       return model;
     }
@@ -350,7 +859,10 @@
       var input = document.getElementById('logfit-input');
       var show = function (logfit) { document.getElementById('logfit-view').classList.toggle('hidden', !logfit); document.getElementById('platen-view').classList.toggle('hidden', logfit); document.getElementById('logfit-view-btn').setAttribute('aria-pressed', String(logfit)); document.getElementById('platen-view-btn').setAttribute('aria-pressed', String(!logfit)); };
       document.getElementById('logfit-view-btn').addEventListener('click', function () { show(true); }); document.getElementById('platen-view-btn').addEventListener('click', function () { show(false); });
-      document.getElementById('logfit-save-btn').addEventListener('click', function () { renderReviewRecords(parseLogFitSentence(input.value).records); });
+      document.getElementById('logfit-save-btn').addEventListener('click', function () { var classification = classifyLogFitInput(input.value); if (classification.kind === 'schedule') { var plan = parseLogFitPlanIntent(input.value); renderPlanReview(plan); return; } if (classification.kind === 'request') { var requestPlan = parseLogFitPlanIntent(input.value); requestPlan.intent = 'request'; requestPlan.status = 'awaiting_plan_chain'; renderPlanReview(requestPlan); return; } renderReviewRecords(parseLogFitSentence(input.value).records); });
+      document.getElementById('logfit-plan-time').addEventListener('change', function (event) { if (!logFitPlanDraft) return; var value = event.target.value; if (!value) return; logFitPlanDraft.planned_start_at = value + ':00+09:00'; logFitPlanDraft.status = 'awaiting_user_approval'; renderPlanReview(logFitPlanDraft); });
+      document.getElementById('logfit-plan-approve-btn').addEventListener('click', function () { if (!logFitPlanDraft || !logFitPlanDraft.planned_start_at) return; var schedule = createScheduleDraft(logFitPlanDraft, { reminder_minutes_before: 30, timezone: LOGFIT_TIME_ZONE }); schedule.status = 'scheduled'; schedule.weather_suggestion = logFitPlanDraft.weather_suggestion || null; saveLogFitSchedule(schedule); var weatherMessage = document.getElementById('logfit-weather-message'); if (weatherMessage) weatherMessage.textContent = '일정이 승인되었습니다. Telegram 알림은 연결 확인 후 별도 등록합니다.'; var approveButton = document.getElementById('logfit-plan-approve-btn'); if (approveButton) { approveButton.disabled = true; approveButton.textContent = '일정 승인됨'; } var savedNotice = document.getElementById('logfit-plan-notice'); if (savedNotice) { savedNotice.textContent = '일정은 저장되었고 아직 Telegram Cron은 생성하지 않았습니다.'; savedNotice.classList.remove('hidden'); } });
+      document.getElementById('logfit-plan-cancel-btn').addEventListener('click', function () { logFitPlanDraft = null; document.getElementById('logfit-plan-review').classList.add('hidden'); });
       document.getElementById('logfit-confirm-btn').addEventListener('click', function () {
         var result = confirmLogFitRecords(readReviewRecords());
         var notice = document.getElementById('logfit-review-notice');
@@ -359,9 +871,77 @@
         document.getElementById('logfit-review').classList.add('hidden'); input.value = ''; renderLogFitDashboard();
       });
       document.getElementById('logfit-review-list').addEventListener('click', function (event) { var button = event.target.closest('[data-remove-review]'); if (!button) return; logFitDraftRecords.splice(Number(button.getAttribute('data-remove-review')), 1); renderReviewRecords(logFitDraftRecords); });
-      document.getElementById('logfit-export-btn').addEventListener('click', logFitDownloadCsv); renderLogFitDashboard();
+      document.getElementById('logfit-export-btn').addEventListener('click', logFitDownloadCsv); loadLogFitBridgeRecords().then(function (records) { renderLogFitDashboard(records); }); loadLogFitCalendarWindows();
     }
-    if (typeof document !== 'undefined' && document.addEventListener) document.addEventListener('DOMContentLoaded', initLogFitUi);
-  </script>
+
+</script>
+
+<script>
+(function () {
+  'use strict';
+  var bridge = 'http://127.0.0.1:8787';
+  var emoji = function (activity, type) {
+    if (type === 'meal') return '🍚'; if (type === 'rest') return '😴';
+    if (/러닝|조깅|달리|유산소|running|jogging|\brun\b/i.test(String(activity || ''))) return '🏃‍♀️';
+    if (/요가|yoga|필라테스|pilates/i.test(String(activity || ''))) return '🧘‍♀️'; return '💪';
+  };
+  // Icon and short name for a recorded workout, used when a day had no plan.
+  function activityKind(name) { var n = String(name || ''); if (/근력|웨이트|strength|weight|상체|하체/i.test(n)) return ['💪', '근력']; if (/러닝|조깅|달리|유산소|running|jogging|\brun\b/i.test(n)) return ['🏃‍♀️', '러닝']; if (/요가|yoga|필라테스|pilates/i.test(n)) return ['🧘‍♀️', '요가']; return ['🏅', '운동']; }
+  var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); };
+  var time = function (value) { var d = new Date(value); return Number.isNaN(d.getTime()) ? '--:--' : new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', hour: '2-digit', minute: '2-digit', hour12: false }).format(d); };
+  var dateLabel = function (value) { var d = new Date(value); return new Intl.DateTimeFormat('ko-KR', { timeZone: 'Asia/Seoul', month: 'numeric', day: 'numeric', weekday: 'short' }).format(d); };
+  var chip = function (status) { var map = { executed: ['done', '실행됨'], proposed: ['adj', '제안 중'], waiting: ['wait', '대기'], accepted: ['done', '수용'], rejected: ['miss', '거절'], none: ['wait', '무응답'], awaiting_confirmation: ['wait', '확인 대기'], awaiting_user_approval: ['wait', '승인 대기'], awaiting_time_confirmation: ['wait', '시간 확인 대기'], skipped: ['adj', '보류'], cancelled: ['miss', '취소'], moved: ['adj', '정정'], already_saved: ['done', '이미 저장됨'] }; var x = map[status] || ['wait', status || '대기']; return '<span class="chip ' + x[0] + '">' + x[1] + '</span>'; };
+  var face = function (kind, label) { var mouth = kind === 'done' ? '<path d="M8.5 14c.9 1.3 2.1 2 3.5 2s2.6-.7 3.5-2"/>' : kind === 'miss' ? '<path d="M7.5 8.5l3 3m0-3l-3 3M13.5 8.5l3 3m0-3l-3 3M8.5 16.5c.9-1.3 2.1-2 3.5-2s2.6.7 3.5 2"/>' : '<path d="M9 15h6" stroke-dasharray="0"/>'; return '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"' + (kind === 'wait' ? ' stroke-dasharray="3 2"' : '') + ' role="img" aria-label="' + esc(label) + '"><circle cx="12" cy="12" r="9"/>' + mouth + '</svg>'; };
+  var getEvents = function (s) { return (s.events || []).filter(function (e) { return e.event_type === 'decision_log'; }); };
+  function uniqueEvents(state) { var seen = {}; return getEvents(state).filter(function (event) { var key = event.event_id || [event.event_type, event.occurred_at, JSON.stringify(event.metadata || {})].join('|'); if (seen[key]) return false; seen[key] = true; return true; }); }
+  function renderStatus(state) { var events = uniqueEvents(state); var e = events.slice(-1)[0]; var n = e ? time(e.occurred_at) : '--:--'; var el = document.querySelector('[data-logfit="status"]'); if (el) el.textContent = 'LogFit 데이터 연결됨 · 판단 로그 ' + events.length + '건 · 마지막 판단 ' + n; var today = document.querySelector('[data-logfit="today"]'); if (today) today.textContent = dateLabel(new Date()); }
+  function renderAsk(state) { var box = document.querySelector('[data-logfit="ask-result"]'); var form = document.querySelector('.ask'); if (!form || form.dataset.bound) return; if (box) box.style.display = 'none'; form.dataset.bound = '1'; var input = document.getElementById('ask'); form.addEventListener('submit', function (ev) { ev.preventDefault(); var result = classifyLogFitInput(input.value); var records = parseLogFitSentence(input.value).records; if (!box) return; box.style.display = 'flex'; if (result.kind === 'schedule') { renderPlanPreview(input, box); return; } box.innerHTML = '<span class="chip">코치 판별: ' + (result.kind === 'request' ? '요청 → 계획 체인' : result.kind === 'schedule' ? '일정' : '기록 ' + records.length + '건') + '</span>' + records.map(function (r) { return '<span>' + emoji(r.exercise_type || r.item, r.type) + ' ' + esc(r.type === 'meal' ? '식사 · ' + (r.meal_period || '') + ' ' + r.item : r.type === 'exercise' ? '운동 · ' + (r.exercise_type || '운동') + (r.duration_min == null ? '' : ' ' + r.duration_min + '분') : '휴식') + '</span>'; }).join('<span class="sep">|</span>') + '<button type="button" class="save">확인하고 저장</button>'; var save = box.querySelector('.save'); if (save) save.onclick = function () { saveToLogFit(input, box, records); }; }); }
+  // Future workout from the input box: preview, then the user's click registers it in this week's plan.
+  function renderPlanPreview(input, box) {
+    var plan = parseLogFitPlanIntent(input.value);
+    if (plan.intent !== 'planned' || !plan.plan_date) { box.innerHTML = '<span class="chip">코치 판별: 계획</span><span>운동 종류와 날짜를 함께 알려주세요.</span>'; return; }
+    var when = dateLabel(plan.plan_date) + ' ' + (plan.planned_start_at ? plan.planned_start_at.slice(11, 16) : (plan.time_label || '') + ' · 시작 시간 미정');
+    var what = plan.activity_name + (plan.distance_km ? ' ' + plan.distance_km + 'km' : '') + (plan.duration_min ? ' ' + plan.duration_min + '분' : '');
+    box.innerHTML = '<span class="chip">코치 판별: 계획</span><span>' + emoji(plan.activity_name) + ' ' + esc(what) + '</span><span class="sep">|</span><span>' + esc(when) + '</span><button type="button" class="save">계획 등록</button>';
+    box.querySelector('.save').onclick = function () {
+      var note = function (text) { var n = box.querySelector('.save-note') || box.appendChild(document.createElement('span')); n.className = 'save-note'; n.textContent = text; };
+      fetch(bridge + '/api/dashboard-plans', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: input.value, plan: plan }) })
+        .then(function (r) { if (!r.ok) throw new Error('bridge_http_' + r.status); return r.json(); })
+        .then(function (r) { if (r.error) throw new Error(r.error); input.value = ''; box.style.display = 'none'; load(); })
+        .catch(function () { note('계획을 저장하지 못했어요. LogFit 연결을 확인해 주세요.'); });
+    };
+  }
+  // Save confirmed dashboard records to LogFit data (same store Telegram uses), then refresh.
+  function saveToLogFit(input, box, records) { var note = function (text) { var n = box.querySelector('.save-note') || box.appendChild(document.createElement('span')); n.className = 'save-note'; n.textContent = text; }; records = records.filter(function (r) { return ['planned', 'draft', 'uncertain'].indexOf(r.completion) < 0; }); if (!records.length) { note('완료한 기록이 없어요. 앞으로 할 운동은 "~할 거야"처럼 계획으로 입력해 주세요.'); return; } if (records.some(function (r) { return !isValidLogFitRecordDate(r.record_date) || r.date_certainty === 'uncertain'; })) { note('날짜를 확인할 수 없는 기록이 있어요. 날짜를 넣어 다시 입력해 주세요.'); return; } var text = input.value; fetch(bridge + '/api/dashboard-records', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: text, records: records }) }).then(function (r) { if (!r.ok) throw new Error('bridge_http_' + r.status); return r.json(); }).then(function (r) { if (r.error) throw new Error(r.error); input.value = ''; box.style.display = 'none'; load(); }).catch(function () { note('저장하지 못했어요. LogFit 연결을 확인해 주세요.'); }); }
+  // A confirmation still marked as waiting whose records are all saved (e.g. the same message sent twice).
+  function alreadySaved(state, m) { if (m.kind !== 'record' || m.status !== 'awaiting_confirmation') return false; var saved = state.records || []; var list = (m.records || []).filter(Boolean); return list.length > 0 && list.every(function (r) { return saved.some(function (x) { return (r.id && x.id === r.id) || (x.raw_text === r.raw_text && x.record_date === r.record_date && (x.type || 'exercise') === (r.type || 'exercise')); }); }); }
+  // Live completed-workout counts for the last 7 days (KST), shown next to the suggestion snapshot.
+  function currentWeekCounts(state) { var today = getKstDate(new Date()); var from = addKstDays(today, -6); var c = { '러닝': 0, '요가': 0, '근력': 0, '운동': 0 }; (state.records || []).forEach(function (r) { if (r.type && r.type !== 'exercise') return; if (r.completion && r.completion !== 'completed') return; if (!r.record_date || r.record_date < from || r.record_date > today) return; c[activityKind(r.exercise_type || r.activity_name || r.item)[1]] += 1; }); return '최근 7일 실제 · 러닝 ' + c['러닝'] + '회 · 요가 ' + c['요가'] + '회 · 근력 ' + c['근력'] + '회' + (c['운동'] ? ' · 기타 ' + c['운동'] + '회' : ''); }
+  function renderLogs(state) { var host = document.querySelector('[data-logfit="decision-log"]'); if (!host) return; var logs = uniqueEvents(state).slice(-8).reverse(); var html = logs.length ? logs.map(function (event) { var m = event.metadata || {}; var d = m.decision_log || {}; var rec = (m.records || [])[0]; var title = d.decision === 'record' && rec ? emoji(rec.exercise_type || rec.item, rec.type) + ' ' + (m.confirmation === 'moved_to_plan' ? '계획 문장 → 계획으로 옮김' : event.channel === 'dashboard' ? '대시보드 기록 저장' : rec.type === 'meal' ? '식사 기록 확인' : '운동 기록 확인') : d.decision === 'request' ? '🏃‍♀️ 운동 계획 생성 → 승인 대기' : d.decision === 'notification_merge' ? '🔔 05:30 알림 합침' : d.decision === 'body_stats' ? '⚖️ 신체 기록 확인' : d.decision === 'schedule' && m.plan_item ? '📅 계획 등록 · ' + dateLabel(m.plan_item.date) + ' ' + m.plan_item.activity + (m.plan_item.distance_km ? ' ' + m.plan_item.distance_km + 'km' : '') : d.decision === 'weather_alert' ? (m.status === 'executed' ? '🌤️ 05:30 날씨 알림 발송' : '🌧️ 날씨 알림 보류') : (m.message || d.decision || '코치 판단'); var toolResults = (m.steps || []).map(function (step) { return step.step + ':' + (step.status || 'unknown'); }).join(' · '); return '<div class="log-item"><div class="log-time">' + time(event.occurred_at) + '</div><div class="log-body"><div class="log-title">' + esc(title) + ' ' + chip(m.confirmation === 'moved_to_plan' ? 'moved' : alreadySaved(state, m) ? 'already_saved' : ['executed','cancelled','rejected','skipped'].indexOf(m.status) >= 0 ? m.status : (d.status || m.status)) + '</div><div class="log-grid"><div><span class="k">입력</span><span class="v">' + esc((d.inputs && d.inputs.text) || m.message || '입력 기록') + '</span></div><div><span class="k">근거</span><span class="v">' + esc(d.reason || (m.decision_log ? '근거 기록 없음' : '판단 근거 기록 기능 도입 전 항목')) + '</span></div></div><div class="log-tools">도구: ' + esc((d.tools || []).join(' → ') || '도구 기록 없음') + '</div><div class="log-tools">도구 결과: ' + esc(toolResults || '결과 기록 없음') + '</div></div></div>'; }).join('') : '<div class="empty">오늘은 아직 판단 로그가 없어요.</div>'; if (host.dataset.html === html) { fitLogs(host); return; } var top = host.scrollTop; host.innerHTML = html; host.dataset.html = html; fitLogs(host); host.scrollTop = top; }
+  var boardMode = window.matchMedia ? window.matchMedia('(min-width:1100px) and (min-height:680px)') : null;
+  // Show the latest 3 decisions; older ones scroll inside the box. On a short desktop screen,
+  // shrink further so the whole dashboard still fits without page scroll.
+  function fitLogs(host) { var items = host.querySelectorAll('.log-item'); if (items.length <= 3) { host.style.maxHeight = ''; return; } var rect = host.getBoundingClientRect(); var height = items[2].getBoundingClientRect().bottom - rect.top + host.scrollTop; host.style.maxHeight = Math.floor(height) + 'px'; if (boardMode && boardMode.matches) { var over = document.documentElement.scrollHeight - window.innerHeight; if (over > 0) host.style.maxHeight = Math.max(180, Math.floor(height - over)) + 'px'; } }
+  function refitLogs() { var host = document.querySelector('[data-logfit="decision-log"]'); if (host) fitLogs(host); }
+  window.addEventListener('resize', refitLogs);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(refitLogs);
+  function response(text) { return fetch(bridge + '/api/responses', { method: 'POST', headers: {'content-type':'application/json'}, body: JSON.stringify({ text: text }) }).then(function (r) { return r.json(); }).then(function (r) { load(); return r; }); }
+  function renderNext(state) { var host = document.querySelector('[data-logfit="next-suggestion"]'); if (!host) return; var suggestions = getEvents(state).map(function (e) { return e.metadata && e.metadata.suggestion; }).filter(Boolean); var s = suggestions.slice(-1)[0]; if (!s || (s.response !== 'none' && s.response !== 'accepted')) { host.innerHTML = '<div class="empty" style="color:#BFDBFE">오늘은 대기 중인 제안이 없어요</div>'; return; } var accepted = s.response === 'accepted'; var option = s.options && s.options[0]; var title = accepted ? '✅ 승인됨 · 05:30 알림' : (option ? emoji(option.activity) + ' ' + option.date.slice(5).replace('-', '월 ') + ' ' + option.time + '<br>' + option.activity : '다음 제안'); host.innerHTML = '<div><div class="eyebrow">' + (accepted ? '제안 처리 완료' : '다음 제안 · 승인 대기') + '</div><h2>' + title + '</h2></div><div class="next-lines"><div><span class="k">근거</span><span>' + esc(s.reason || '판단 근거를 확인해 주세요.') + (s.created_at ? '<small class="asof">제안 시점 ' + esc(dateLabel(s.created_at) + ' ' + time(s.created_at)) + ' 기준</small>' : '') + '</span></div><div><span class="k">현재</span><span>' + esc(currentWeekCounts(state)) + '</span></div></div><div class="next-actions">' + (accepted ? '' : '<button type="button" class="btn-primary" data-response="1안 승인">승인하고 알림 등록</button><button type="button" class="btn-ghost" data-response="대안 선택">대안으로</button><button type="button" class="btn-ghost small" data-response="거절">거절</button>') + '</div>'; host.querySelectorAll('[data-response]').forEach(function (b) { b.onclick = function () { response(b.dataset.response); }; }); }
+  function renderWeek(state) { var host = document.querySelector('[data-logfit="week"]'); if (!host) return; var now = new Date(); var k = getKstParts(now); var today = getKstDate(now); var monday = addKstDays(today, -((k.weekday + 6) % 7)); var plans = (state.plans || []).flatMap(function (p) { return p.items || []; }); var records = state.records || []; var names = ['월','화','수','목','금','토','일']; host.innerHTML = names.map(function (name, i) { var date = addKstDays(monday, i); var p = plans.find(function (x) { return x.date === date; }); var dayRecords = records.filter(function (x) { return x.record_date === date; }); var completed = dayRecords.filter(function (x) { return x.type === 'exercise' && x.completion === 'completed'; }); var rest = dayRecords.some(function (x) { return x.type === 'rest' && x.completion === 'completed'; }); var startAt = p && p.time ? new Date(p.date + 'T' + p.time + ':00+09:00') : null; var upcoming = Boolean(p && p.status === 'planned' && (startAt && !Number.isNaN(startAt.getTime()) ? startAt.getTime() > now.getTime() : date >= today)); var status = completed.length ? 'done' : p && (p.status === 'adjusted' || p.status === 'rescheduled') ? 'adj' : upcoming ? 'wait' : p && p.status === 'planned' ? 'miss' : 'wait'; var kinds = []; completed.forEach(function (x) { var k = activityKind(x.exercise_type || x.activity_name || x.item); if (!kinds.some(function (y) { return y[1] === k[1]; })) kinds.push(k); }); var unplanned = !p && kinds.length > 0; var activity = p ? emoji(p.activity) + ' ' + p.activity + (p.distance_km ? ' ' + p.distance_km + 'km' : '') : '—'; var minutes = completed.reduce(function (sum, x) { return sum + (Number(x.duration_min) || 0); }, 0); var actual = completed.length ? (minutes ? minutes + '분' : '완료') : rest ? '😴 휴식' : upcoming ? '예정' : p ? '미수행' : '휴식'; var label = status === 'done' ? '완료' : status === 'miss' ? '미수행' : status === 'adj' ? '재조정' : upcoming ? '예정' : '휴식'; return '<div class="day"><div class="name">' + name + '</div>' + (unplanned ? '<div class="plan unplanned" title="계획 없이 한 운동: ' + esc(kinds.map(function (k) { return k[1]; }).join(', ')) + '">' + kinds.map(function (k) { return k[0]; }).join('') + (kinds.length === 1 ? '<small>' + esc(kinds[0][1]) + '</small>' : '') + '</div>' : '<div class="plan ' + (p ? 'future' : '') + '"' + (p ? ' title="' + esc((p.time || p.time_label || '시간 미정') + ' · ' + (p.raw_text || p.activity)) + '"' : '') + '>' + esc(activity) + '</div>') + '<div class="act ' + status + '">' + face(status, label) + '<span>' + esc(actual) + '</span></div></div>'; }).join(''); var sub = document.querySelector('[data-logfit="week-sub"]'); if (sub) sub.textContent = '계획 ' + plans.length + '건 · 실제 완료 ' + records.filter(function (r) { return r.type === 'exercise' && r.completion === 'completed'; }).length + '건'; var range = document.querySelector('[data-logfit="week-range"]'); if (range) range.textContent = monday.slice(5).replace('-', '/') + ' – ' + addKstDays(monday, 6).slice(5).replace('-', '/'); }
+  function renderBalance(state) { var host = document.querySelector('[data-logfit="balance"]'); if (!host) return; var now = new Date(); var today = getKstDate(now); var monday = addKstDays(today, -((getKstParts(now).weekday + 6) % 7)); var sunday = addKstDays(monday, 6); var records = (state.records || []).filter(function (r) { return r.type === 'exercise' && r.record_date >= monday && r.record_date <= sunday; }); var goals = [['러닝',3,'#2563EB'],['근력',2,'#0F766E'],['요가',2,'#B45309']]; host.innerHTML = '<div class="t">종목 균형 (주 목표 대비)</div>' + goals.map(function (g) { var n = records.filter(function (r) { return r.completion === 'completed' && (function (name) { return g[0] === '러닝' ? /러닝|조깅|달리기|유산소|running|jogging|\brun\b/i.test(name) : g[0] === '요가' ? /요가|yoga|필라테스|pilates/i.test(name) : /근력|웨이트|strength|weight/i.test(name); })(r.exercise_type || r.activity_name || r.item || ''); }).length; return '<div class="bar"><span class="n">' + g[0] + '</span><div class="track"><div class="fill" style="width:' + Math.min(100, n / g[1] * 100) + '%;background:' + g[2] + '"></div></div><span class="l">' + n + ' / ' + g[1] + '회</span></div>'; }).join(''); }
+  function renderSuggestions(state) { var ss = getEvents(state).map(function (e) { return e.metadata && e.metadata.suggestion; }).filter(Boolean).slice(-7).reverse(); var stats = document.querySelector('[data-logfit="suggestion-stats"]'); var list = document.querySelector('[data-logfit="suggestion-list"]'); if (stats) { var a=ss.filter(function(s){return s.response==='accepted'}).length, r=ss.filter(function(s){return s.response==='rejected'}).length, n=ss.filter(function(s){return s.response==='none'}).length; stats.innerHTML='<div class="tile"><div class="k">제안</div><div class="v">'+ss.length+'</div></div><div class="tile accent"><div class="k">수용률</div><div class="v">'+(ss.length?Math.round(a/ss.length*100):0)+'%</div></div><div class="tile"><div class="k">수용 · 거절</div><div class="v" style="font-size:20px">'+a+' · '+r+'</div></div><div class="tile"><div class="k">무응답</div><div class="v" style="font-size:20px">'+n+'</div></div>'; } if (list) { list.innerHTML=ss.slice(0,4).map(function(s){return '<div class="reply"><div><div class="t">'+esc((s.options&&s.options[0]&&s.options[0].activity)||'운동 제안')+'</div><div class="w">'+esc(s.created_at&&dateLabel(s.created_at)||'최근')+'</div></div>'+chip(s.response)+'</div>';}).join('') || '<div class="empty">최근 7일 제안이 없어요.</div>'; var b=document.querySelector('[data-export]'); if(b)b.onclick=function(){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([exportLogFitCsv(state.records||[])],{type:'text/csv'}));a.download='logfit-records-verification.csv';a.click();}; } }
+  function renderMemory(state) { var host=document.querySelector('[data-logfit="memory-rules"]'); if(!host)return; var rules=state.memory_rules||[]; host.innerHTML=rules.length?rules.map(function(r){return '<div class="m"><div class="r">'+esc(r.rule)+'<span>'+esc(r.since||'')+'</span></div><div class="f">'+esc(r.evidence||'')+'</div></div>';}).join(''):'<div class="empty">아직 학습된 선호가 없어요. 제안에 응답하면 여기에 쌓입니다.</div>'; }
+  function renderBodyStats(state) { var host = document.querySelector('[data-logfit="body-stats"]'); if (!host) return; var v = (state.body_stats || []).slice(-1)[0]; if (!v) { host.innerHTML = '<div class="stat"><span class="k">체중</span><span class="v">데이터 없음</span></div><div class="stat"><span class="k">체지방률</span><span class="v">데이터 없음</span></div><div class="stat"><span class="k">근육량</span><span class="v">데이터 없음</span></div><p class="note">데이터 출처: 저장된 신체 기록 없음</p>'; return; } var updated = v.updated_at ? ' · 최종 업데이트 ' + time(v.updated_at) : ''; host.innerHTML = '<div class="stat"><span class="k">체중</span><span class="v">' + (v.weight_kg == null ? '데이터 없음' : v.weight_kg + '<small> kg</small>') + '</span></div><div class="stat"><span class="k">체지방률</span><span class="v">' + (v.body_fat_pct == null ? '데이터 없음' : v.body_fat_pct + '<small> %</small>') + '</span></div><div class="stat"><span class="k">근육량</span><span class="v">' + (v.muscle_kg == null ? '데이터 없음' : v.muscle_kg + '<small> kg</small>') + '</span></div><p class="note">데이터 출처: ' + esc(v.source || '확인된 신체 기록') + updated + '</p>'; }
+  function bindAsk() { var input=document.getElementById('ask'); var form=document.querySelector('.ask'); if(form)form.addEventListener('submit',function(e){e.preventDefault();}); }
+  function load() { fetch(bridge+'/api/state').then(function(r){return r.json();}).then(function(s){renderStatus(s);renderAsk(s);renderLogs(s);renderNext(s);renderWeek(s);renderBalance(s);renderSuggestions(s);renderMemory(s);renderBodyStats(s);}).catch(function(){}); }
+  if (document.getElementById('ask')) {
+    bindAsk(); load();
+    // Live refresh so Telegram and cron changes appear without reloading the page.
+    setInterval(function () { if (!document.hidden) load(); }, 5000);
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
+  }
+})();
+</script>
+
 </body>
 </html>

@@ -13,3 +13,7 @@ Thumbs.db
 coverage/
 *.log
 *.csv
+.logfit-runtime/
+.superpowers/brainstorm/
+__pycache__/
+*.pyc

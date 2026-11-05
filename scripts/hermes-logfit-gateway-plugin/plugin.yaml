@@ -1,0 +1,4 @@
+name: logfit-gateway-intercept
+version: 0.1.0
+description: Route LogFit Telegram records and responses before the Hermes agent turn
+requires_hermes: ">=0.21.6"
